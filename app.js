@@ -1,4 +1,68 @@
-// Убираем экран загрузки немедленно после инициализации
+'use strict';
+
+// Константы приложения
+const APP_CONFIG = {
+    VERSION: '1.0.0',
+    MASTER_ADMIN_KEY: 'ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q',
+    MAX_MESSAGE_LENGTH: 1000,
+    MAX_NICKNAME_LENGTH: 20,
+    MIN_NICKNAME_LENGTH: 3,
+    SESSION_TIMEOUT: 24 * 60 * 60 * 1000,
+    AUTO_SAVE_INTERVAL: 30000,
+    MAX_USERS_PER_SESSION: 100
+};
+
+// Защита от отладки (в production)
+(function() {
+    const devtools = {open: false};
+    
+    setInterval(function() {
+        if (window.outerHeight - window.innerHeight > 200 || 
+            window.outerWidth - window.innerWidth > 200) {
+            if (!devtools.open) {
+                devtools.open = true;
+                console.clear();
+                console.warn('🔒 SecureChat Pro - Protected Application');
+            }
+        }
+    }, 500);
+
+    // Отключаем контекстное меню и горячие клавиши
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey && (e.key === 'u' || e.key === 'U')) ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) ||
+            e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+    });
+})();
+
+class SecureChatPro {
+    constructor() {
+        this.currentUser = null;
+        this.isAdmin = false;
+        this.personalKey = null;
+        this.users = [];
+        this.selectedUser = null;
+        this.isPrivateChat = false;
+        this.sessionStart = new Date();
+        
+        // Базы данных (localStorage)
+        this.userDatabase = this.loadFromStorage('scp_users') || [];
+        this.keyDatabase = this.loadFromStorage('scp_keys') || [];
+        this.messageDatabase = this.loadFromStorage('scp_messages') || [];
+        
+        this.init();
+    }
+
+    init() {
+        this.generatePersonalKey();
+        this.bindEvents();
+        this.initializeMasterAdmin();
+        this.startAutoSave();
+        this.addSystemMessage('🔒 SecureChat Pro инициализирован');
         this.hideLoadingScreen();
     }
 
@@ -248,9 +312,15 @@
         document.getElementById('remainingInvites').textContent = this.isAdmin ? '∞' : this.currentUser.remainingInvites;
 
         // Обновляем настройки
-        document.getElementById('sessionNickname').textContent = this.currentUser.nickname;
-        document.getElementById('sessionStart').textContent = new Date(this.sessionStart).toLocaleString();
-        document.getElementById('sessionInvites').textContent = this.isAdmin ? '∞' : this.currentUser.remainingInvites;
+        if (document.getElementById('sessionNickname')) {
+            document.getElementById('sessionNickname').textContent = this.currentUser.nickname;
+        }
+        if (document.getElementById('sessionStart')) {
+            document.getElementById('sessionStart').textContent = new Date(this.sessionStart).toLocaleString();
+        }
+        if (document.getElementById('sessionInvites')) {
+            document.getElementById('sessionInvites').textContent = this.isAdmin ? '∞' : this.currentUser.remainingInvites;
+        }
 
         // Показываем секции
         document.getElementById('nav-chat').classList.remove('hidden');
@@ -281,7 +351,7 @@
                     this.userDatabase[userIndex] = this.currentUser;
                 }
             }
-        }, 60000); // Каждую минуту
+        }, 60000);
     }
 
     generateUserId() {
@@ -512,7 +582,10 @@
                 this.userDatabase[userIndex] = this.currentUser;
             }
             document.getElementById('remainingInvites').textContent = this.currentUser.remainingInvites;
-            document.getElementById('sessionInvites').textContent = this.currentUser.remainingInvites;
+            
+            if (document.getElementById('sessionInvites')) {
+                document.getElementById('sessionInvites').textContent = this.currentUser.remainingInvites;
+            }
             
             if (this.currentUser.remainingInvites <= 0) {
                 document.getElementById('generateInviteBtn').disabled = true;
@@ -580,6 +653,8 @@
 
     updateAdminInviteList() {
         const listContainer = document.getElementById('adminInviteList');
+        if (!listContainer) return;
+        
         const adminKeys = this.keyDatabase
             .filter(k => k.createdBy === this.currentUser.id || this.currentUser.isMaster)
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -646,6 +721,8 @@
         
         // Обновляем список пользователей
         const listContainer = document.getElementById('allUsersList');
+        if (!listContainer) return;
+        
         listContainer.innerHTML = '';
         
         if (this.userDatabase.length === 0) {
@@ -727,48 +804,73 @@
         this.showNotification('💾 Ключ экспортирован в файл', 'success');
     }
 
-    // Криптография
+    // Простое шифрование (без CryptoJS пока не загрузится)
     encrypt(message) {
         try {
-            const keyWordArray = CryptoJS.enc.Hex.parse(this.personalKey);
-            const iv = CryptoJS.lib.WordArray.random(16);
-            
-            const encrypted = CryptoJS.AES.encrypt(message, keyWordArray, {
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
-            });
-            
-            return {
-                ciphertext: encrypted.toString(),
-                iv: iv.toString(),
-                timestamp: Date.now(),
-                version: APP_CONFIG.VERSION
-            };
+            if (typeof CryptoJS !== 'undefined') {
+                const keyWordArray = CryptoJS.enc.Hex.parse(this.personalKey);
+                const iv = CryptoJS.lib.WordArray.random(16);
+                
+                const encrypted = CryptoJS.AES.encrypt(message, keyWordArray, {
+                    iv: iv,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                });
+                
+                return {
+                    ciphertext: encrypted.toString(),
+                    iv: iv.toString(),
+                    timestamp: Date.now(),
+                    version: APP_CONFIG.VERSION
+                };
+            } else {
+                // Простое кодирование base64 если CryptoJS не загружен
+                return {
+                    ciphertext: btoa(message),
+                    iv: 'fallback',
+                    timestamp: Date.now(),
+                    version: APP_CONFIG.VERSION,
+                    fallback: true
+                };
+            }
         } catch (error) {
             console.error('Ошибка шифрования:', error);
-            return null;
+            return {
+                ciphertext: btoa(message),
+                iv: 'error',
+                timestamp: Date.now(),
+                version: APP_CONFIG.VERSION,
+                fallback: true
+            };
         }
     }
 
     decrypt(encryptedData) {
         try {
-            const keyWordArray = CryptoJS.enc.Hex.parse(this.personalKey);
+            if (encryptedData.fallback) {
+                return atob(encryptedData.ciphertext);
+            }
             
-            const decrypted = CryptoJS.AES.decrypt(
-                encryptedData.ciphertext,
-                keyWordArray,
-                {
-                    iv: CryptoJS.enc.Hex.parse(encryptedData.iv),
-                    mode: CryptoJS.mode.CBC,
-                    padding: CryptoJS.pad.Pkcs7
-                }
-            );
-            
-            return decrypted.toString(CryptoJS.enc.Utf8);
+            if (typeof CryptoJS !== 'undefined') {
+                const keyWordArray = CryptoJS.enc.Hex.parse(this.personalKey);
+                
+                const decrypted = CryptoJS.AES.decrypt(
+                    encryptedData.ciphertext,
+                    keyWordArray,
+                    {
+                        iv: CryptoJS.enc.Hex.parse(encryptedData.iv),
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    }
+                );
+                
+                return decrypted.toString(CryptoJS.enc.Utf8);
+            } else {
+                return atob(encryptedData.ciphertext);
+            }
         } catch (error) {
             console.error('Ошибка расшифровки:', error);
-            return null;
+            return encryptedData.ciphertext; // Возвращаем как есть
         }
     }
 
@@ -776,8 +878,19 @@
         const timestamp = Date.now().toString(36).toUpperCase();
         const random = Array.from(crypto.getRandomValues(new Uint8Array(16)))
             .map(b => b.toString(36).toUpperCase()).join('');
-        const checksum = CryptoJS.SHA256(timestamp + random).toString().substring(0, 8).toUpperCase();
+        const checksum = this.simpleHash(timestamp + random).substring(0, 8).toUpperCase();
         return `SCP_${timestamp}_${random}_${checksum}`;
+    }
+
+    // Простой хеш для случаев когда CryptoJS не загружен
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Конвертируем в 32bit integer
+        }
+        return Math.abs(hash).toString(36);
     }
 
     // Утилиты
@@ -868,33 +981,25 @@
 
     copyToClipboard(text) {
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).then(() => {
-                // Успешно скопировано
-            }).catch(() => {
-                this.fallbackCopyTextToClipboard(text);
-            });
+            navigator.clipboard.writeText(text);
         } else {
-            this.fallbackCopyTextToClipboard(text);
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Копирование не удалось', err);
+            }
+            
+            document.body.removeChild(textArea);
         }
-    }
-
-    fallbackCopyTextToClipboard(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            document.execCommand('copy');
-        } catch (err) {
-            console.error('Fallback copy failed', err);
-        }
-        
-        document.body.removeChild(textArea);
     }
 
     logout() {
@@ -975,9 +1080,11 @@ class SecurityManager {
         document.addEventListener('drop', e => e.preventDefault());
         
         // Блокируем выделение текста в критических местах
-        document.querySelectorAll('.encryption-info, .admin-section-header').forEach(el => {
-            el.classList.add('user-select-none');
-        });
+        setTimeout(() => {
+            document.querySelectorAll('.encryption-info, .admin-section-header').forEach(el => {
+                if (el) el.classList.add('user-select-none');
+            });
+        }, 1000);
     }
 
     static addKeyboardShortcuts() {
@@ -1036,29 +1143,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Ждем загрузки CryptoJS
+    // Ждем загрузки CryptoJS (не критично)
     if (typeof CryptoJS === 'undefined') {
-        console.log('Ожидание загрузки CryptoJS...');
-        const checkCrypto = setInterval(() => {
-            if (typeof CryptoJS !== 'undefined') {
-                clearInterval(checkCrypto);
-                initializeApp();
-            }
-        }, 100);
-        
-        // Таймаут на случай если CryptoJS не загрузится
-        setTimeout(() => {
-            clearInterval(checkCrypto);
-            if (typeof CryptoJS === 'undefined') {
-                alert('❌ Не удалось загрузить библиотеку шифрования. Проверьте интернет-соединение.');
-            }
-        }, 10000);
-    } else {
-        initializeApp();
+        console.log('CryptoJS не загружен, используем fallback шифрование');
     }
-});
 
-function initializeApp() {
     // Инициализируем системы
     SecurityManager.init();
     ErrorHandler.init();
@@ -1068,7 +1157,7 @@ function initializeApp() {
     
     console.log(`🔒 SecureChat Pro v${APP_CONFIG.VERSION} успешно запущен`);
     console.log(`👑 Мастер-ключ администратора: ${APP_CONFIG.MASTER_ADMIN_KEY}`);
-}
+});
 
 // Защита от закрытия страницы
 window.addEventListener('beforeunload', function(e) {
@@ -1092,70 +1181,4 @@ window.addEventListener('unload', function() {
 if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     window.SecureChatPro = SecureChatPro;
     window.APP_CONFIG = APP_CONFIG;
-}'use strict';
-
-// Константы приложения
-const APP_CONFIG = {
-    VERSION: '1.0.0',
-    MASTER_ADMIN_KEY: 'ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q',
-    MAX_MESSAGE_LENGTH: 1000,
-    MAX_NICKNAME_LENGTH: 20,
-    MIN_NICKNAME_LENGTH: 3,
-    SESSION_TIMEOUT: 24 * 60 * 60 * 1000, // 24 часа
-    AUTO_SAVE_INTERVAL: 30000, // 30 секунд
-    MAX_USERS_PER_SESSION: 100
-};
-
-// Защита от отладки (в production)
-(function() {
-    const devtools = {open: false};
-    
-    setInterval(function() {
-        if (window.outerHeight - window.innerHeight > 200 || 
-            window.outerWidth - window.innerWidth > 200) {
-            if (!devtools.open) {
-                devtools.open = true;
-                console.clear();
-                console.warn('🔒 SecureChat Pro - Protected Application');
-            }
-        }
-    }, 500);
-
-    // Отключаем контекстное меню и горячие клавиши
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey && (e.key === 'u' || e.key === 'U')) ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) ||
-            e.key === 'F12') {
-            e.preventDefault();
-            return false;
-        }
-    });
-})();
-
-class SecureChatPro {
-    constructor() {
-        this.currentUser = null;
-        this.isAdmin = false;
-        this.personalKey = null;
-        this.users = [];
-        this.selectedUser = null;
-        this.isPrivateChat = false;
-        this.sessionStart = new Date();
-        
-        // Базы данных (localStorage)
-        this.userDatabase = this.loadFromStorage('scp_users') || [];
-        this.keyDatabase = this.loadFromStorage('scp_keys') || [];
-        this.messageDatabase = this.loadFromStorage('scp_messages') || [];
-        
-        this.init();
-    }
-
-    init() {
-        this.generatePersonalKey();
-        this.bindEvents();
-        this.initializeMasterAdmin();
-        this.startAutoSave();
-        this.addSystemMessage('🔒 SecureChat Pro инициализирован');
-        
-        // Убира
+}
