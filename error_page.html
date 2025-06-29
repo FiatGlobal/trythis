@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка доступа - SecureChat Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #e1e1e1;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .error-container {
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(45, 45, 45, 0.9);
+            border: 1px solid #404040;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #ff4444;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .error-code {
+            font-family: monospace;
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #0078d4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #106ebe;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #777;
+        }
+
+        .help-text {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .help-text a {
+            color: #0078d4;
+            text-decoration: none;
+        }
+
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .error-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🔒</div>
+        <h1>Ошибка доступа</h1>
+        <div class="error-message" id="errorMessage">
+            Произошла ошибка при обращении к SecureChat Pro. 
+            Проверьте правильность адреса или попробуйте позже.
+        </div>
+        <div class="error-code" id="errorCode">
+            ERROR_CODE: UNKNOWN
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">
+                🏠 На главную
+            </a>
+            <button onclick="location.reload()" class="btn btn-secondary">
+                🔄 Обновить
+            </button>
+        </div>
+
+        <div class="help-text">
+            <strong>Возможные причины:</strong><br>
+            • Неверный адрес страницы<br>
+            • Временные проблемы с сервером<br>
+            • Ваш браузер не поддерживает требуемые технологии<br>
+            • Проблемы с SSL сертификатом<br><br>
+            
+            <strong>Что делать:</strong><br>
+            • Проверьте адрес в адресной строке<br>
+            • Убедитесь что JavaScript включен<br>
+            • Используйте современный браузер<br>
+            • Попробуйте открыть в режиме инкогнито<br><br>
+            
+            Если проблема продолжается, обратитесь к администратору.
+        </div>
+    </div>
+
+    <script>
+        // Определяем тип ошибки по URL или коду состояния
+        function detectErrorType() {
+            const url = window.location.href;
+            const errorCode = document.getElementById('errorCode');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Проверяем query параметры
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            
+            if (url.includes('403') || error === '403') {
+                errorCode.textContent = 'ERROR_CODE: 403 FORBIDDEN';
+                errorMessage.textContent = 'Доступ к этому ресурсу запрещен. У вас нет прав для просмотра этой страницы.';
+            } else if (url.includes('404') || error === '404') {
+                errorCode.textContent = 'ERROR_CODE: 404 NOT FOUND';
+                errorMessage.textContent = 'Запрашиваемая страница не найдена. Возможно, она была перемещена или удалена.';
+            } else if (url.includes('500') || error === '500') {
+                errorCode.textContent = 'ERROR_CODE: 500 INTERNAL ERROR';
+                errorMessage.textContent = 'Внутренняя ошибка сервера. Мы работаем над устранением проблемы.';
+            } else if (url.includes('502') || error === '502') {
+                errorCode.textContent = 'ERROR_CODE: 502 BAD GATEWAY';
+                errorMessage.textContent = 'Сервер временно недоступен. Попробуйте обновить страницу через несколько минут.';
+            } else if (url.includes('503') || error === '503') {
+                errorCode.textContent = 'ERROR_CODE: 503 SERVICE UNAVAILABLE';
+                errorMessage.textContent = 'Сервис временно недоступен из-за технического обслуживания.';
+            } else {
+                errorCode.textContent = 'ERROR_CODE: UNKNOWN_ERROR';
+                errorMessage.textContent = 'Произошла неизвестная ошибка при загрузке SecureChat Pro.';
+            }
+        }
+
+        // Проверяем поддержку браузера
+        function checkBrowserSupport() {
+            const features = {
+                crypto: !!window.crypto,
+                localStorage: !!window.localStorage,
+                fetch: !!window.fetch,
+                es6: (function() {
+                    try {
+                        eval('const x = () => {};');
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                })()
+            };
+
+            const unsupported = Object.entries(features)
+                .filter(([key, supported]) => !supported)
+                .map(([key]) => key);
+
+            if (unsupported.length > 0) {
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.innerHTML = `
+                    <strong>Ваш браузер не поддерживает:</strong><br>
+                    ${unsupported.join(', ')}<br><br>
+                    Пожалуйста, используйте современный браузер:<br>
+                    Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
+                `;
+                
+                document.getElementById('errorCode').textContent = 'ERROR_CODE: BROWSER_UNSUPPORTED';
+            }
+        }
+
+        // Автоматическое перенаправление через 30 секунд (опционально)
+        function startAutoRedirect() {
+            let countdown = 30;
+            const redirectBtn = document.querySelector('.btn-primary');
+            const originalText = redirectBtn.textContent;
+            
+            const timer = setInterval(() => {
+                countdown--;
+                redirectBtn.innerHTML = `🏠 На главную (${countdown}с)`;
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    window.location.href = '/';
+                }
+            }, 1000);
+            
+            // Отменяем автоперенаправление при клике
+            redirectBtn.addEventListener('click', () => {
+                clearInterval(timer);
+                redirectBtn.textContent = originalText;
+            });
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            detectErrorType();
+            checkBrowserSupport();
+            
+            // Раскомментируйте если нужно автоперенаправление:
+            // startAutoRedirect();
+            
+            // Логирование ошибки (только для отладки)
+            console.error('SecureChat Pro Error Page:', {
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Обработка клавиш
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                window.location.href = '/';
+            } else if (e.key === 'r' || e.key === 'R') {
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>
