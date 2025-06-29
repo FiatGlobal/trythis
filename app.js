@@ -1,11 +1,18 @@
-        // Убираем экран загрузки
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => loadingScreen.remove(), 500);
-            }
-        }, 2000);
+// Убираем экран загрузки немедленно после инициализации
+        this.hideLoadingScreen();
+    }
+
+    hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                if (loadingScreen.parentNode) {
+                    loadingScreen.remove();
+                }
+            }, 500);
+        }
     }
 
     // Инициализация мастер-админа
@@ -1024,11 +1031,34 @@ class ErrorHandler {
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
     // Проверяем поддержку необходимых API
-    if (!window.crypto || !window.localStorage || typeof CryptoJS === 'undefined') {
-        alert('❌ Ваш браузер не поддерживает необходимые технологии для работы SecureChat Pro. Пожалуйста, используйте современный браузер.');
+    if (!window.crypto || !window.localStorage) {
+        alert('❌ Ваш браузер не поддерживает необходимые технологии для работы SecureChat Pro.');
         return;
     }
 
+    // Ждем загрузки CryptoJS
+    if (typeof CryptoJS === 'undefined') {
+        console.log('Ожидание загрузки CryptoJS...');
+        const checkCrypto = setInterval(() => {
+            if (typeof CryptoJS !== 'undefined') {
+                clearInterval(checkCrypto);
+                initializeApp();
+            }
+        }, 100);
+        
+        // Таймаут на случай если CryptoJS не загрузится
+        setTimeout(() => {
+            clearInterval(checkCrypto);
+            if (typeof CryptoJS === 'undefined') {
+                alert('❌ Не удалось загрузить библиотеку шифрования. Проверьте интернет-соединение.');
+            }
+        }, 10000);
+    } else {
+        initializeApp();
+    }
+});
+
+function initializeApp() {
     // Инициализируем системы
     SecurityManager.init();
     ErrorHandler.init();
@@ -1038,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log(`🔒 SecureChat Pro v${APP_CONFIG.VERSION} успешно запущен`);
     console.log(`👑 Мастер-ключ администратора: ${APP_CONFIG.MASTER_ADMIN_KEY}`);
-});
+}
 
 // Защита от закрытия страницы
 window.addEventListener('beforeunload', function(e) {
