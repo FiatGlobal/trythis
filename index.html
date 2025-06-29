@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureChat Pro</title>
-    <meta name="description" content="Анонимный защищенный мессенджер с end-to-end шифрованием">
-    <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
     <style>
         * {
             margin: 0;
@@ -109,12 +105,6 @@
             color: #888;
         }
 
-        .encryption-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
         .main-content {
             flex: 1;
             display: flex;
@@ -180,10 +170,6 @@
             border-color: #0078d4;
         }
 
-        .form-input.error {
-            border-color: #ff4444;
-        }
-
         .btn {
             padding: 12px 20px;
             background: #0078d4;
@@ -194,32 +180,11 @@
             font-weight: 500;
             cursor: pointer;
             transition: background 0.2s;
+            width: 100%;
         }
 
         .btn:hover {
             background: #106ebe;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        .btn-secondary {
-            background: #666;
-        }
-
-        .btn-danger {
-            background: #d13438;
-        }
-
-        .info-box {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 120, 212, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(0, 120, 212, 0.3);
-            font-size: 12px;
-            color: #888;
         }
 
         .chat-header {
@@ -315,11 +280,6 @@
             max-height: 100px;
         }
 
-        .message-input:focus {
-            outline: none;
-            border-color: #0078d4;
-        }
-
         .users-panel {
             width: 250px;
             background: #2d2d2d;
@@ -330,17 +290,6 @@
         .users-title {
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .user-search {
-            width: 100%;
-            padding: 8px 12px;
-            background: #1a1a1a;
-            border: 1px solid #404040;
-            border-radius: 20px;
-            color: #e1e1e1;
-            font-size: 12px;
             margin-bottom: 15px;
         }
 
@@ -360,10 +309,6 @@
             background: #404040;
         }
 
-        .user-item.selected {
-            background: rgba(0, 120, 212, 0.3);
-        }
-
         .user-avatar {
             width: 32px;
             height: 32px;
@@ -377,68 +322,6 @@
             color: white;
         }
 
-        .user-status {
-            width: 8px;
-            height: 8px;
-            background: #00ff00;
-            border-radius: 50%;
-            margin-left: auto;
-        }
-
-        .invite-section {
-            background: #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        .invite-button {
-            width: 100%;
-            padding: 10px;
-            background: #0078d4;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .invite-code-display {
-            background: #1a1a1a;
-            border: 1px solid #404040;
-            border-radius: 4px;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 10px;
-            margin-top: 10px;
-            word-break: break-all;
-            color: #00ff00;
-        }
-
-        .admin-section {
-            background: #2d2d2d;
-            border: 1px solid #404040;
-            border-radius: 8px;
-            margin: 20px;
-            overflow: hidden;
-        }
-
-        .admin-section-header {
-            padding: 15px 20px;
-            background: #333;
-            border-bottom: 1px solid #404040;
-            font-weight: 600;
-        }
-
-        .admin-section-content {
-            padding: 20px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -450,7 +333,6 @@
             color: white;
             z-index: 1000;
             animation: slideIn 0.3s ease;
-            max-width: 300px;
         }
 
         .notification.error {
@@ -468,78 +350,35 @@
             to { transform: translateX(0); }
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-            }
-            
-            .users-panel {
-                width: 200px;
-            }
-            
-            .auth-form {
-                width: 90%;
-                margin: 20px;
-            }
+        .hidden {
+            display: none !important;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
+        .demo-keys {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 120, 212, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 120, 212, 0.3);
+            font-size: 12px;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #404040;
+        .demo-key {
+            font-family: monospace;
+            color: #00ff00;
+            margin: 5px 0;
+            cursor: pointer;
+            padding: 5px;
             border-radius: 4px;
+            transition: background 0.2s;
         }
 
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            backdrop-filter: blur(10px);
-        }
-
-        .loading-content {
-            text-align: center;
-            color: white;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #333;
-            border-top: 3px solid #0078d4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .demo-key:hover {
+            background: rgba(0, 255, 0, 0.1);
         }
     </style>
 </head>
 <body>
-    <div class="loading" id="loadingScreen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <div style="font-size: 20px; margin-bottom: 10px;">🔒 SecureChat Pro</div>
-            <div style="font-size: 14px; color: #888;">Инициализация защищенного соединения...</div>
-        </div>
-    </div>
-
     <div class="app">
         <div class="sidebar">
             <div class="sidebar-header">
@@ -547,7 +386,7 @@
                 <div class="user-info" id="userInfo">Не авторизован</div>
                 <div class="connection-status">
                     <div class="status-dot"></div>
-                    <span>Защищенное соединение</span>
+                    <span>Готов к работе</span>
                 </div>
             </div>
 
@@ -555,22 +394,21 @@
                 <button class="nav-item active" data-section="auth" id="nav-auth">🔐 Авторизация</button>
                 <button class="nav-item hidden" data-section="chat" id="nav-chat">💬 Чат</button>
                 <button class="nav-item hidden" data-section="admin" id="nav-admin">👑 Админ</button>
-                <button class="nav-item hidden" data-section="settings" id="nav-settings">⚙️ Настройки</button>
                 <button class="nav-item hidden" data-section="logout" id="nav-logout">🚪 Выход</button>
             </nav>
 
             <div class="encryption-info">
-                <div class="encryption-row">
-                    <span>Ключ:</span>
-                    <span id="personal-key">Не установлен</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Пользователей:</span>
+                    <span id="userCount">0</span>
                 </div>
-                <div class="encryption-row">
-                    <span>Обновлен:</span>
-                    <span id="key-updated">--:--</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Сообщений:</span>
+                    <span id="messageCount">0</span>
                 </div>
-                <div class="encryption-row">
-                    <span>Приглашений:</span>
-                    <span id="invites-left">0</span>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Статус:</span>
+                    <span id="appStatus">Готов</span>
                 </div>
             </div>
         </div>
@@ -585,7 +423,7 @@
                         <div class="form-group">
                             <label class="form-label">Ключ доступа</label>
                             <input type="text" class="form-input" id="accessKey" 
-                                   placeholder="Введите ваш ключ доступа" maxlength="128">
+                                   placeholder="Введите ваш ключ доступа">
                         </div>
                         
                         <div class="form-group">
@@ -594,14 +432,16 @@
                                    placeholder="Выберите никнейм (3-20 символов)" maxlength="20">
                         </div>
                         
-                        <button class="btn btn-full" id="loginBtn">Войти в чат</button>
+                        <button class="btn" id="loginBtn">Войти в чат</button>
                         
-                        <div class="info-box">
-                            <strong>ℹ️ Как получить доступ:</strong><br>
-                            • Запросите ключ доступа у администратора<br>
-                            • Или получите приглашение от друга<br>
-                            • Никнейм должен быть уникальным<br>
-                            • Ваши сообщения шифруются локально
+                        <div class="demo-keys">
+                            <h4>🔑 Ключ администратора:</h4>
+                            <div class="demo-key" onclick="useAdminKey()">
+                                ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q
+                            </div>
+                            <div style="margin-top: 8px; color: #888; font-size: 11px;">
+                                Кликните чтобы скопировать ключ в поле ввода
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -621,70 +461,39 @@
                             <div class="message-input-form">
                                 <textarea class="message-input" id="messageInput" 
                                           placeholder="Введите сообщение..." rows="1"></textarea>
-                                <button class="btn" id="sendBtn">Отправить</button>
+                                <button class="btn" id="sendBtn" style="width: auto; padding: 12px 20px;">Отправить</button>
                             </div>
                         </div>
                     </div>
 
                     <div class="users-panel">
                         <div class="users-title">Пользователи (<span id="onlineCount">0</span>)</div>
-                        <input type="text" class="user-search" id="userSearch" placeholder="Поиск пользователей...">
-                        
-                        <button class="btn btn-secondary btn-full" id="publicChatBtn" style="margin-bottom: 15px;">
-                            📢 Общий чат
-                        </button>
                         
                         <div id="usersList"></div>
                         
-                        <div class="invite-section">
+                        <div style="margin-top: 20px; padding: 15px; background: #333; border-radius: 8px;">
                             <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px;">
-                                🎫 Пригласить друга
+                                🎫 Создать ключ доступа
                             </div>
-                            <div style="font-size: 11px; color: #888; margin-bottom: 10px;">
-                                Приглашений: <span id="remainingInvites">1</span>
-                            </div>
-                            <button class="invite-button" id="generateInviteBtn">
-                                Создать приглашение
+                            <button class="btn" id="generateKeyBtn" style="font-size: 12px;">
+                                Создать ключ для друга
                             </button>
-                            <div class="invite-code-display hidden" id="generatedInviteCode"></div>
+                            <div id="generatedKey" style="margin-top: 10px; font-family: monospace; font-size: 10px; color: #00ff00; word-break: break-all;"></div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Админ -->
+            <!-- Админ панель -->
             <section id="admin" class="section">
                 <div class="chat-header">
                     <div class="chat-title">👑 Панель администратора</div>
                 </div>
                 
-                <div class="admin-section">
-                    <div class="admin-section-header">🔑 Генератор ключей доступа</div>
-                    <div class="admin-section-content">
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: end;">
-                            <div>
-                                <label style="display: block; font-size: 12px; margin-bottom: 5px;">Количество</label>
-                                <input type="number" class="form-input" id="adminInviteCount" value="1" min="1" max="50" style="width: 80px;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 12px; margin-bottom: 5px;">Срок действия</label>
-                                <select class="form-input" id="adminInviteExpiry" style="width: 120px;">
-                                    <option value="1">1 день</option>
-                                    <option value="7" selected>7 дней</option>
-                                    <option value="30">30 дней</option>
-                                    <option value="0">Бессрочно</option>
-                                </select>
-                            </div>
-                            <button class="btn" id="adminGenerateBtn">Создать ключи</button>
-                        </div>
-                        <div id="adminInviteList" style="max-height: 250px; overflow-y: auto; border: 1px solid #404040; border-radius: 4px;"></div>
-                    </div>
-                </div>
-
-                <div class="admin-section">
-                    <div class="admin-section-header">📊 Статистика системы</div>
-                    <div class="admin-section-content">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="padding: 20px;">
+                    <div style="background: #2d2d2d; border: 1px solid #404040; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h3>📊 Статистика</h3>
+                        <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                             <div style="text-align: center; padding: 15px; background: rgba(0, 120, 212, 0.1); border-radius: 8px;">
                                 <div style="font-size: 24px; font-weight: bold; color: #0078d4;" id="totalUsers">0</div>
                                 <div style="font-size: 12px; color: #888;">Всего пользователей</div>
@@ -694,67 +503,442 @@
                                 <div style="font-size: 12px; color: #888;">Онлайн сейчас</div>
                             </div>
                             <div style="text-align: center; padding: 15px; background: rgba(255, 107, 53, 0.1); border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: bold; color: #ff6b35;" id="activeKeys">0</div>
-                                <div style="font-size: 12px; color: #888;">Активных ключей</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #ff6b35;" id="totalMessages">0</div>
+                                <div style="font-size: 12px; color: #888;">Сообщений</div>
                             </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <h4 style="margin-bottom: 10px;">👥 Список пользователей</h4>
-                            <div id="allUsersList" style="max-height: 200px; overflow-y: auto; border: 1px solid #404040; border-radius: 4px;"></div>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <!-- Настройки -->
-            <section id="settings" class="section">
-                <div class="chat-header">
-                    <div class="chat-title">⚙️ Настройки безопасности</div>
-                </div>
-                
-                <div class="admin-section">
-                    <div class="admin-section-header">🔐 Персональный ключ шифрования</div>
-                    <div class="admin-section-content">
-                        <div style="background: #1a1a1a; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 11px; margin-bottom: 15px; word-break: break-all; color: #00ff00;" id="personalKeyDisplay">
-                            Загружается...
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button class="btn" id="regenerateKeyBtn">🔄 Перегенерировать</button>
-                            <button class="btn btn-secondary" id="exportKeyBtn">💾 Экспорт</button>
-                        </div>
-                        <div style="font-size: 11px; color: #888; padding: 10px; background: rgba(255, 68, 68, 0.1); border-radius: 4px; border: 1px solid rgba(255, 68, 68, 0.3);">
-                            ⚠️ <strong>Важно:</strong> Смена ключа сделает невозможной расшифровку старых сообщений. Обязательно сделайте экспорт перед перегенерацией!
-                        </div>
-                    </div>
-                </div>
-
-                <div class="admin-section">
-                    <div class="admin-section-header">📱 Информация о сессии</div>
-                    <div class="admin-section-content">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 12px;">
+                    <div style="background: #2d2d2d; border: 1px solid #404040; border-radius: 8px; padding: 20px;">
+                        <h3>🔑 Создать ключи доступа</h3>
+                        <div style="margin-top: 15px; display: flex; gap: 10px; align-items: end;">
                             <div>
-                                <strong>Никнейм:</strong> <span id="sessionNickname">-</span>
+                                <label style="display: block; font-size: 12px; margin-bottom: 5px;">Количество</label>
+                                <input type="number" class="form-input" id="keyCount" value="1" min="1" max="10" style="width: 80px;">
                             </div>
-                            <div>
-                                <strong>Статус:</strong> <span style="color: #00ff00;">Онлайн</span>
-                            </div>
-                            <div>
-                                <strong>Вход:</strong> <span id="sessionStart">-</span>
-                            </div>
-                            <div>
-                                <strong>Приглашений:</strong> <span id="sessionInvites">-</span>
-                            </div>
+                            <button class="btn" id="adminGenerateBtn" style="width: auto;">Создать ключи</button>
                         </div>
+                        <div id="adminKeysList" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
                     </div>
                 </div>
             </section>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" 
-            integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" 
-            crossorigin="anonymous"></script>
-    <script src="app.js"></script>
+    <script>
+        // Простая версия SecureChat Pro
+        class SimpleSecureChat {
+            constructor() {
+                this.currentUser = null;
+                this.isAdmin = false;
+                this.users = this.loadData('users') || [];
+                this.messages = this.loadData('messages') || [];
+                this.keys = this.loadData('keys') || [];
+                this.masterKey = 'ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q';
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.addSystemMessage('🔒 SecureChat Pro готов к работе');
+                this.updateStats();
+            }
+
+            bindEvents() {
+                // Навигация
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const section = e.target.dataset.section;
+                        if (section === 'logout') {
+                            this.logout();
+                        } else if (section) {
+                            this.showSection(section);
+                        }
+                    });
+                });
+
+                // Авторизация
+                document.getElementById('loginBtn').addEventListener('click', () => this.login());
+                
+                // Enter в полях
+                document.getElementById('accessKey').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.login();
+                });
+                document.getElementById('nickname').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.login();
+                });
+
+                // Чат
+                document.getElementById('sendBtn').addEventListener('click', () => this.sendMessage());
+                document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                // Генерация ключей
+                document.getElementById('generateKeyBtn').addEventListener('click', () => this.generateUserKey());
+                document.getElementById('adminGenerateBtn').addEventListener('click', () => this.generateAdminKeys());
+            }
+
+            login() {
+                const key = document.getElementById('accessKey').value.trim();
+                const nickname = document.getElementById('nickname').value.trim();
+
+                if (!key) {
+                    this.showNotification('Введите ключ доступа', 'error');
+                    return;
+                }
+
+                if (!nickname || nickname.length < 3) {
+                    this.showNotification('Никнейм должен быть от 3 символов', 'error');
+                    return;
+                }
+
+                // Проверяем мастер-ключ
+                if (key === this.masterKey) {
+                    this.isAdmin = true;
+                } else {
+                    // Проверяем в созданных ключах
+                    const validKey = this.keys.find(k => k.key === key && k.active);
+                    if (!validKey) {
+                        this.showNotification('Недействительный ключ доступа', 'error');
+                        return;
+                    }
+                    // Помечаем ключ как использованный
+                    validKey.active = false;
+                }
+
+                // Проверяем уникальность никнейма
+                if (this.users.some(u => u.nickname.toLowerCase() === nickname.toLowerCase())) {
+                    this.showNotification('Никнейм уже занят', 'error');
+                    return;
+                }
+
+                // Создаем пользователя
+                this.currentUser = {
+                    id: Date.now(),
+                    nickname: nickname,
+                    isAdmin: this.isAdmin,
+                    joinedAt: new Date()
+                };
+
+                this.users.push(this.currentUser);
+                this.saveData('users', this.users);
+
+                this.completeAuth();
+            }
+
+            completeAuth() {
+                // Обновляем интерфейс
+                document.getElementById('userInfo').textContent = `${this.currentUser.nickname}${this.isAdmin ? ' 👑' : ''}`;
+                
+                // Показываем секции
+                document.getElementById('nav-chat').classList.remove('hidden');
+                document.getElementById('nav-logout').classList.remove('hidden');
+                document.getElementById('nav-auth').classList.add('hidden');
+                
+                if (this.isAdmin) {
+                    document.getElementById('nav-admin').classList.remove('hidden');
+                }
+
+                this.showNotification(`Добро пожаловать, ${this.currentUser.nickname}!`, 'success');
+                this.showSection('chat');
+                this.updateUsersList();
+                this.updateStats();
+                this.addSystemMessage(`${this.currentUser.nickname} присоединился к чату`);
+            }
+
+            sendMessage() {
+                const input = document.getElementById('messageInput');
+                const text = input.value.trim();
+
+                if (!text) return;
+
+                const message = {
+                    id: Date.now(),
+                    text: text,
+                    sender: this.currentUser.nickname,
+                    senderId: this.currentUser.id,
+                    timestamp: new Date()
+                };
+
+                this.messages.push(message);
+                this.saveData('messages', this.messages);
+                this.addMessage(message.text, message.sender, true);
+                
+                input.value = '';
+                this.updateStats();
+            }
+
+            addMessage(text, sender, isOwn = false) {
+                const messagesArea = document.getElementById('messagesArea');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+
+                const time = new Date().toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">${this.escapeHtml(sender)} • ${time}</div>
+                    <div class="message-content">${this.escapeHtml(text)}</div>
+                `;
+
+                messagesArea.appendChild(messageDiv);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+
+            addSystemMessage(text) {
+                const messagesArea = document.getElementById('messagesArea');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message system';
+
+                const time = new Date().toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">Система • ${time}</div>
+                    <div class="message-content">${this.escapeHtml(text)}</div>
+                `;
+
+                messagesArea.appendChild(messageDiv);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+
+            generateUserKey() {
+                if (!this.currentUser) return;
+
+                const key = 'USER_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substr(2, 5).toUpperCase();
+                
+                this.keys.push({
+                    key: key,
+                    createdBy: this.currentUser.nickname,
+                    createdAt: new Date(),
+                    active: true
+                });
+
+                this.saveData('keys', this.keys);
+                
+                document.getElementById('generatedKey').textContent = key;
+                this.copyToClipboard(key);
+                this.showNotification('Ключ создан и скопирован!', 'success');
+            }
+
+            generateAdminKeys() {
+                if (!this.isAdmin) return;
+
+                const count = parseInt(document.getElementById('keyCount').value) || 1;
+                const keysList = document.getElementById('adminKeysList');
+                
+                keysList.innerHTML = '';
+
+                for (let i = 0; i < count; i++) {
+                    const key = 'USER_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                    
+                    this.keys.push({
+                        key: key,
+                        createdBy: this.currentUser.nickname,
+                        createdAt: new Date(),
+                        active: true
+                    });
+
+                    const keyDiv = document.createElement('div');
+                    keyDiv.style.cssText = 'padding: 8px; margin: 5px 0; background: #1a1a1a; border-radius: 4px; font-family: monospace; font-size: 11px; cursor: pointer; word-break: break-all;';
+                    keyDiv.textContent = key;
+                    keyDiv.onclick = () => {
+                        this.copyToClipboard(key);
+                        this.showNotification('Ключ скопирован', 'success');
+                    };
+                    keysList.appendChild(keyDiv);
+                }
+
+                this.saveData('keys', this.keys);
+                this.showNotification(`Создано ${count} ключей`, 'success');
+            }
+
+            updateUsersList() {
+                const listContainer = document.getElementById('usersList');
+                const countElement = document.getElementById('onlineCount');
+                
+                listContainer.innerHTML = '';
+                
+                this.users.forEach(user => {
+                    if (user.id === this.currentUser.id) return;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'user-item';
+                    
+                    const firstLetter = user.nickname.charAt(0).toUpperCase();
+                    const adminBadge = user.isAdmin ? ' 👑' : '';
+                    
+                    item.innerHTML = `
+                        <div class="user-avatar">${firstLetter}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500;">${this.escapeHtml(user.nickname)}${adminBadge}</div>
+                            <div style="font-size: 10px; color: #666;">Онлайн</div>
+                        </div>
+                    `;
+                    
+                    listContainer.appendChild(item);
+                });
+                
+                countElement.textContent = this.users.length - 1;
+            }
+
+            updateStats() {
+                document.getElementById('userCount').textContent = this.users.length;
+                document.getElementById('messageCount').textContent = this.messages.length;
+                document.getElementById('appStatus').textContent = this.currentUser ? 'Онлайн' : 'Готов';
+
+                if (this.isAdmin) {
+                    document.getElementById('totalUsers').textContent = this.users.length;
+                    document.getElementById('onlineUsers').textContent = this.users.length;
+                    document.getElementById('totalMessages').textContent = this.messages.length;
+                }
+            }
+
+            showSection(sectionName) {
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                const targetSection = document.getElementById(sectionName);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+                
+                const navItem = document.getElementById(`nav-${sectionName}`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+
+                if (sectionName === 'chat') {
+                    this.loadMessages();
+                }
+            }
+
+            loadMessages() {
+                const messagesArea = document.getElementById('messagesArea');
+                messagesArea.innerHTML = '';
+                
+                this.messages.slice(-50).forEach(msg => {
+                    this.addMessage(msg.text, msg.sender, msg.senderId === this.currentUser.id);
+                });
+            }
+
+            logout() {
+                if (confirm('Выйти из чата?')) {
+                    // Удаляем пользователя из списка
+                    this.users = this.users.filter(u => u.id !== this.currentUser.id);
+                    this.saveData('users', this.users);
+
+                    this.currentUser = null;
+                    this.isAdmin = false;
+
+                    // Сброс интерфейса
+                    document.getElementById('nav-chat').classList.add('hidden');
+                    document.getElementById('nav-admin').classList.add('hidden');
+                    document.getElementById('nav-logout').classList.add('hidden');
+                    document.getElementById('nav-auth').classList.remove('hidden');
+                    
+                    document.getElementById('userInfo').textContent = 'Не авторизован';
+                    document.getElementById('accessKey').value = '';
+                    document.getElementById('nickname').value = '';
+                    
+                    this.showSection('auth');
+                    this.showNotification('Вы вышли из чата', 'success');
+                    this.updateStats();
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                // Удаляем старые уведомления
+                document.querySelectorAll('.notification').forEach(n => n.remove());
+                
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 3000);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text || '';
+                return div.innerHTML;
+            }
+
+            copyToClipboard(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                } else {
+                    // Fallback для старых браузеров
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            saveData(key, data) {
+                try {
+                    localStorage.setItem('scp_' + key, JSON.stringify(data));
+                } catch (error) {
+                    console.error('Ошибка сохранения:', error);
+                }
+            }
+
+            loadData(key) {
+                try {
+                    const data = localStorage.getItem('scp_' + key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Ошибка загрузки:', error);
+                    return null;
+                }
+            }
+        }
+
+        // Функция для демо-ключа
+        function useAdminKey() {
+            document.getElementById('accessKey').value = 'ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q';
+            document.getElementById('nickname').value = 'Admin';
+            document.getElementById('nickname').focus();
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            window.app = new SimpleSecureChat();
+            console.log('🔒 SecureChat Pro загружен и готов к работе');
+        });
+
+        // Защита от случайного закрытия
+        window.addEventListener('beforeunload', function(e) {
+            if (window.app && window.app.currentUser) {
+                e.preventDefault();
+                e.returnValue = 'Вы уверены, что хотите покинуть чат?';
+                return e.returnValue;
+            }
+        });
+    </script>
 </body>
 </html>
