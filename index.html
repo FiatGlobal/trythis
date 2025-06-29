@@ -170,6 +170,10 @@
             border-color: #0078d4;
         }
 
+        .form-input.error {
+            border-color: #ff4444;
+        }
+
         .btn {
             padding: 12px 20px;
             background: #0078d4;
@@ -333,6 +337,7 @@
             color: white;
             z-index: 1000;
             animation: slideIn 0.3s ease;
+            max-width: 300px;
         }
 
         .notification.error {
@@ -376,6 +381,23 @@
         .demo-key:hover {
             background: rgba(0, 255, 0, 0.1);
         }
+
+        .key-display {
+            font-family: monospace;
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 11px;
+            word-break: break-all;
+            color: #00ff00;
+            cursor: pointer;
+        }
+
+        .key-display:hover {
+            background: #333;
+        }
     </style>
 </head>
 <body>
@@ -399,16 +421,16 @@
 
             <div class="encryption-info">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span>Пользователей:</span>
-                    <span id="userCount">0</span>
+                    <span>Онлайн:</span>
+                    <span id="onlineCount">0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>Сообщений:</span>
                     <span id="messageCount">0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
-                    <span>Статус:</span>
-                    <span id="appStatus">Готов</span>
+                    <span>Ключей:</span>
+                    <span id="keyCount">0</span>
                 </div>
             </div>
         </div>
@@ -440,7 +462,8 @@
                                 ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q
                             </div>
                             <div style="margin-top: 8px; color: #888; font-size: 11px;">
-                                Кликните чтобы скопировать ключ в поле ввода
+                                Кликните чтобы скопировать ключ в поле ввода.<br>
+                                Мастер-ключ можно использовать многократно.
                             </div>
                         </div>
                     </div>
@@ -467,7 +490,7 @@
                     </div>
 
                     <div class="users-panel">
-                        <div class="users-title">Пользователи (<span id="onlineCount">0</span>)</div>
+                        <div class="users-title">Пользователи (<span id="usersOnlineCount">0</span>)</div>
                         
                         <div id="usersList"></div>
                         
@@ -478,7 +501,7 @@
                             <button class="btn" id="generateKeyBtn" style="font-size: 12px;">
                                 Создать ключ для друга
                             </button>
-                            <div id="generatedKey" style="margin-top: 10px; font-family: monospace; font-size: 10px; color: #00ff00; word-break: break-all;"></div>
+                            <div id="generatedKey"></div>
                         </div>
                     </div>
                 </div>
@@ -490,7 +513,7 @@
                     <div class="chat-title">👑 Панель администратора</div>
                 </div>
                 
-                <div style="padding: 20px;">
+                <div style="padding: 20px; overflow-y: auto;">
                     <div style="background: #2d2d2d; border: 1px solid #404040; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
                         <h3>📊 Статистика</h3>
                         <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
@@ -499,8 +522,8 @@
                                 <div style="font-size: 12px; color: #888;">Всего пользователей</div>
                             </div>
                             <div style="text-align: center; padding: 15px; background: rgba(0, 255, 0, 0.1); border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: bold; color: #00ff00;" id="onlineUsers">0</div>
-                                <div style="font-size: 12px; color: #888;">Онлайн сейчас</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #00ff00;" id="adminOnlineUsers">0</div>
+                                <div style="font-size: 12px; color: #888;">Сейчас онлайн</div>
                             </div>
                             <div style="text-align: center; padding: 15px; background: rgba(255, 107, 53, 0.1); border-radius: 8px;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff6b35;" id="totalMessages">0</div>
@@ -509,16 +532,21 @@
                         </div>
                     </div>
 
-                    <div style="background: #2d2d2d; border: 1px solid #404040; border-radius: 8px; padding: 20px;">
+                    <div style="background: #2d2d2d; border: 1px solid #404040; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
                         <h3>🔑 Создать ключи доступа</h3>
                         <div style="margin-top: 15px; display: flex; gap: 10px; align-items: end;">
                             <div>
                                 <label style="display: block; font-size: 12px; margin-bottom: 5px;">Количество</label>
-                                <input type="number" class="form-input" id="keyCount" value="1" min="1" max="10" style="width: 80px;">
+                                <input type="number" class="form-input" id="adminKeyCount" value="1" min="1" max="10" style="width: 80px;">
                             </div>
                             <button class="btn" id="adminGenerateBtn" style="width: auto;">Создать ключи</button>
                         </div>
                         <div id="adminKeysList" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div style="background: #2d2d2d; border: 1px solid #404040; border-radius: 8px; padding: 20px;">
+                        <h3>👥 Управление пользователями</h3>
+                        <div id="adminUsersList" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
                     </div>
                 </div>
             </section>
@@ -526,14 +554,12 @@
     </div>
 
     <script>
-        // Простая версия SecureChat Pro
-        class SimpleSecureChat {
+        // Улучшенная версия SecureChat Pro с исправлением всех багов
+        class SecureChatPro {
             constructor() {
                 this.currentUser = null;
                 this.isAdmin = false;
-                this.users = this.loadData('users') || [];
-                this.messages = this.loadData('messages') || [];
-                this.keys = this.loadData('keys') || [];
+                this.sessionId = null;
                 this.masterKey = 'ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q';
                 
                 this.init();
@@ -541,8 +567,18 @@
 
             init() {
                 this.bindEvents();
+                this.loadAndDisplayMessages();
+                this.updateAllStats();
                 this.addSystemMessage('🔒 SecureChat Pro готов к работе');
-                this.updateStats();
+                
+                // Автообновление каждые 3 секунды
+                setInterval(() => {
+                    if (this.currentUser) {
+                        this.updateUserActivity();
+                        this.loadAndDisplayMessages();
+                        this.updateAllStats();
+                    }
+                }, 3000);
             }
 
             bindEvents() {
@@ -587,13 +623,25 @@
                 const key = document.getElementById('accessKey').value.trim();
                 const nickname = document.getElementById('nickname').value.trim();
 
+                // Очищаем ошибки
+                document.getElementById('accessKey').classList.remove('error');
+                document.getElementById('nickname').classList.remove('error');
+
                 if (!key) {
                     this.showNotification('Введите ключ доступа', 'error');
+                    document.getElementById('accessKey').classList.add('error');
                     return;
                 }
 
                 if (!nickname || nickname.length < 3) {
                     this.showNotification('Никнейм должен быть от 3 символов', 'error');
+                    document.getElementById('nickname').classList.add('error');
+                    return;
+                }
+
+                if (!/^[a-zA-Zа-яА-Я0-9_-]+$/u.test(nickname)) {
+                    this.showNotification('Никнейм может содержать только буквы, цифры, _ и -', 'error');
+                    document.getElementById('nickname').classList.add('error');
                     return;
                 }
 
@@ -602,32 +650,32 @@
                     this.isAdmin = true;
                 } else {
                     // Проверяем в созданных ключах
-                    const validKey = this.keys.find(k => k.key === key && k.active);
+                    const keys = this.getGlobalData('keys') || [];
+                    const validKey = keys.find(k => k.key === key && k.active);
                     if (!validKey) {
                         this.showNotification('Недействительный ключ доступа', 'error');
+                        document.getElementById('accessKey').classList.add('error');
                         return;
                     }
-                    // Помечаем ключ как использованный
-                    validKey.active = false;
+                    // Помечаем ключ как использованный (НЕ удаляем для повторного входа)
+                    validKey.usedCount = (validKey.usedCount || 0) + 1;
+                    this.setGlobalData('keys', keys);
                 }
 
-                // Проверяем уникальность никнейма
-                if (this.users.some(u => u.nickname.toLowerCase() === nickname.toLowerCase())) {
-                    this.showNotification('Никнейм уже занят', 'error');
-                    return;
-                }
-
-                // Создаем пользователя
+                // Создаем уникальную сессию пользователя
+                this.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
                 this.currentUser = {
-                    id: Date.now(),
+                    sessionId: this.sessionId,
                     nickname: nickname,
                     isAdmin: this.isAdmin,
-                    joinedAt: new Date()
+                    loginTime: Date.now(),
+                    lastActivity: Date.now()
                 };
 
-                this.users.push(this.currentUser);
-                this.saveData('users', this.users);
-
+                // Добавляем к активным пользователям
+                this.addActiveUser(this.currentUser);
+                
                 this.completeAuth();
             }
 
@@ -646,8 +694,8 @@
 
                 this.showNotification(`Добро пожаловать, ${this.currentUser.nickname}!`, 'success');
                 this.showSection('chat');
-                this.updateUsersList();
-                this.updateStats();
+                this.loadAndDisplayMessages();
+                this.updateAllStats();
                 this.addSystemMessage(`${this.currentUser.nickname} присоединился к чату`);
             }
 
@@ -657,150 +705,294 @@
 
                 if (!text) return;
 
+                if (text.length > 1000) {
+                    this.showNotification('Сообщение слишком длинное (максимум 1000 символов)', 'error');
+                    return;
+                }
+
                 const message = {
-                    id: Date.now(),
+                    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                     text: text,
                     sender: this.currentUser.nickname,
-                    senderId: this.currentUser.id,
-                    timestamp: new Date()
+                    senderSession: this.currentUser.sessionId,
+                    timestamp: Date.now(),
+                    date: new Date().toISOString()
                 };
 
-                this.messages.push(message);
-                this.saveData('messages', this.messages);
-                this.addMessage(message.text, message.sender, true);
+                // Сохраняем в глобальные сообщения
+                const messages = this.getGlobalData('messages') || [];
+                messages.push(message);
+                
+                // Оставляем только последние 1000 сообщений
+                if (messages.length > 1000) {
+                    messages.splice(0, messages.length - 1000);
+                }
+                
+                this.setGlobalData('messages', messages);
                 
                 input.value = '';
-                this.updateStats();
+                this.loadAndDisplayMessages();
+                this.updateAllStats();
             }
 
-            addMessage(text, sender, isOwn = false) {
+            loadAndDisplayMessages() {
+                const messages = this.getGlobalData('messages') || [];
                 const messagesArea = document.getElementById('messagesArea');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+                
+                // Показываем последние 50 сообщений
+                const recentMessages = messages.slice(-50);
+                
+                // Проверяем нужно ли обновлять
+                const currentHtml = messagesArea.innerHTML;
+                const newHtml = this.generateMessagesHtml(recentMessages);
+                
+                if (currentHtml !== newHtml) {
+                    const scrollBottom = messagesArea.scrollTop === (messagesArea.scrollHeight - messagesArea.clientHeight);
+                    messagesArea.innerHTML = newHtml;
+                    
+                    // Прокручиваем вниз если пользователь был внизу
+                    if (scrollBottom || currentHtml === '') {
+                        messagesArea.scrollTop = messagesArea.scrollHeight;
+                    }
+                }
+            }
 
-                const time = new Date().toLocaleTimeString('ru-RU', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+            generateMessagesHtml(messages) {
+                return messages.map(msg => {
+                    const isOwn = this.currentUser && msg.senderSession === this.currentUser.sessionId;
+                    const isSystem = msg.sender === 'Система';
+                    
+                    const time = new Date(msg.timestamp).toLocaleTimeString('ru-RU', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
 
-                messageDiv.innerHTML = `
-                    <div class="message-header">${this.escapeHtml(sender)} • ${time}</div>
-                    <div class="message-content">${this.escapeHtml(text)}</div>
-                `;
-
-                messagesArea.appendChild(messageDiv);
-                messagesArea.scrollTop = messagesArea.scrollHeight;
+                    const messageClass = isSystem ? 'system' : (isOwn ? 'own' : 'other');
+                    
+                    return `
+                        <div class="message ${messageClass}">
+                            <div class="message-header">${this.escapeHtml(msg.sender)} • ${time}</div>
+                            <div class="message-content">${this.escapeHtml(msg.text)}</div>
+                        </div>
+                    `;
+                }).join('');
             }
 
             addSystemMessage(text) {
-                const messagesArea = document.getElementById('messagesArea');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message system';
+                const message = {
+                    id: 'sys_' + Date.now(),
+                    text: text,
+                    sender: 'Система',
+                    senderSession: 'system',
+                    timestamp: Date.now()
+                };
 
-                const time = new Date().toLocaleTimeString('ru-RU', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                messageDiv.innerHTML = `
-                    <div class="message-header">Система • ${time}</div>
-                    <div class="message-content">${this.escapeHtml(text)}</div>
-                `;
-
-                messagesArea.appendChild(messageDiv);
-                messagesArea.scrollTop = messagesArea.scrollHeight;
+                const messages = this.getGlobalData('messages') || [];
+                messages.push(message);
+                this.setGlobalData('messages', messages);
             }
 
             generateUserKey() {
                 if (!this.currentUser) return;
 
-                const key = 'USER_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substr(2, 5).toUpperCase();
+                const key = 'USER_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
                 
-                this.keys.push({
+                const keys = this.getGlobalData('keys') || [];
+                keys.push({
                     key: key,
                     createdBy: this.currentUser.nickname,
-                    createdAt: new Date(),
-                    active: true
+                    createdAt: Date.now(),
+                    active: true,
+                    usedCount: 0
                 });
 
-                this.saveData('keys', this.keys);
+                this.setGlobalData('keys', keys);
                 
-                document.getElementById('generatedKey').textContent = key;
+                const generatedKeyDiv = document.getElementById('generatedKey');
+                generatedKeyDiv.innerHTML = `<div class="key-display" onclick="app.copyToClipboard('${key}')">${key}</div>`;
+                
                 this.copyToClipboard(key);
                 this.showNotification('Ключ создан и скопирован!', 'success');
+                this.updateAllStats();
             }
 
             generateAdminKeys() {
                 if (!this.isAdmin) return;
 
-                const count = parseInt(document.getElementById('keyCount').value) || 1;
+                const count = parseInt(document.getElementById('adminKeyCount').value) || 1;
                 const keysList = document.getElementById('adminKeysList');
                 
-                keysList.innerHTML = '';
+                const keys = this.getGlobalData('keys') || [];
+                const newKeys = [];
 
                 for (let i = 0; i < count; i++) {
-                    const key = 'USER_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                    const key = 'ADMIN_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
                     
-                    this.keys.push({
+                    const keyObj = {
                         key: key,
                         createdBy: this.currentUser.nickname,
-                        createdAt: new Date(),
-                        active: true
-                    });
-
-                    const keyDiv = document.createElement('div');
-                    keyDiv.style.cssText = 'padding: 8px; margin: 5px 0; background: #1a1a1a; border-radius: 4px; font-family: monospace; font-size: 11px; cursor: pointer; word-break: break-all;';
-                    keyDiv.textContent = key;
-                    keyDiv.onclick = () => {
-                        this.copyToClipboard(key);
-                        this.showNotification('Ключ скопирован', 'success');
+                        createdAt: Date.now(),
+                        active: true,
+                        usedCount: 0
                     };
-                    keysList.appendChild(keyDiv);
+                    
+                    keys.push(keyObj);
+                    newKeys.push(keyObj);
                 }
 
-                this.saveData('keys', this.keys);
+                this.setGlobalData('keys', keys);
+                this.updateAdminKeysDisplay();
                 this.showNotification(`Создано ${count} ключей`, 'success');
+                this.updateAllStats();
+            }
+
+            updateAdminKeysDisplay() {
+                const keysList = document.getElementById('adminKeysList');
+                const keys = this.getGlobalData('keys') || [];
+                
+                keysList.innerHTML = keys.map(key => `
+                    <div class="key-display" onclick="app.copyToClipboard('${key.key}')">
+                        <div style="font-weight: bold;">${key.key}</div>
+                        <div style="font-size: 10px; color: #888; margin-top: 5px;">
+                            Создан: ${new Date(key.createdAt).toLocaleString()} • 
+                            Использований: ${key.usedCount || 0} • 
+                            Статус: ${key.active ? '🟢 Активен' : '🔴 Неактивен'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            addActiveUser(user) {
+                const activeUsers = this.getGlobalData('activeUsers') || [];
+                
+                // Удаляем старые сессии этого пользователя
+                const filteredUsers = activeUsers.filter(u => u.nickname !== user.nickname);
+                
+                // Добавляем новую сессию
+                filteredUsers.push(user);
+                
+                this.setGlobalData('activeUsers', filteredUsers);
+            }
+
+            removeActiveUser() {
+                if (!this.currentUser) return;
+                
+                const activeUsers = this.getGlobalData('activeUsers') || [];
+                const filteredUsers = activeUsers.filter(u => u.sessionId !== this.currentUser.sessionId);
+                
+                this.setGlobalData('activeUsers', filteredUsers);
+            }
+
+            updateUserActivity() {
+                if (!this.currentUser) return;
+                
+                const activeUsers = this.getGlobalData('activeUsers') || [];
+                const userIndex = activeUsers.findIndex(u => u.sessionId === this.currentUser.sessionId);
+                
+                if (userIndex !== -1) {
+                    activeUsers[userIndex].lastActivity = Date.now();
+                    this.setGlobalData('activeUsers', activeUsers);
+                }
+            }
+
+            getActiveUsers() {
+                const activeUsers = this.getGlobalData('activeUsers') || [];
+                const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+                
+                // Фильтруем активных пользователей (активность менее 5 минут назад)
+                const recentUsers = activeUsers.filter(user => user.lastActivity > fiveMinutesAgo);
+                
+                // Обновляем список если что-то изменилось
+                if (recentUsers.length !== activeUsers.length) {
+                    this.setGlobalData('activeUsers', recentUsers);
+                }
+                
+                return recentUsers;
             }
 
             updateUsersList() {
                 const listContainer = document.getElementById('usersList');
-                const countElement = document.getElementById('onlineCount');
+                const activeUsers = this.getActiveUsers();
+                const otherUsers = activeUsers.filter(u => u.sessionId !== this.currentUser?.sessionId);
                 
-                listContainer.innerHTML = '';
-                
-                this.users.forEach(user => {
-                    if (user.id === this.currentUser.id) return;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'user-item';
-                    
+                listContainer.innerHTML = otherUsers.map(user => {
                     const firstLetter = user.nickname.charAt(0).toUpperCase();
                     const adminBadge = user.isAdmin ? ' 👑' : '';
                     
-                    item.innerHTML = `
-                        <div class="user-avatar">${firstLetter}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 500;">${this.escapeHtml(user.nickname)}${adminBadge}</div>
-                            <div style="font-size: 10px; color: #666;">Онлайн</div>
+                    return `
+                        <div class="user-item">
+                            <div class="user-avatar">${firstLetter}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500;">${this.escapeHtml(user.nickname)}${adminBadge}</div>
+                                <div style="font-size: 10px; color: #666;">Онлайн</div>
+                            </div>
                         </div>
                     `;
-                    
-                    listContainer.appendChild(item);
-                });
-                
-                countElement.textContent = this.users.length - 1;
+                }).join('');
             }
 
-            updateStats() {
-                document.getElementById('userCount').textContent = this.users.length;
-                document.getElementById('messageCount').textContent = this.messages.length;
-                document.getElementById('appStatus').textContent = this.currentUser ? 'Онлайн' : 'Готов';
+            updateAdminUsersList() {
+                if (!this.isAdmin) return;
+                
+                const listContainer = document.getElementById('adminUsersList');
+                const activeUsers = this.getActiveUsers();
+                
+                listContainer.innerHTML = activeUsers.map(user => {
+                    const adminBadge = user.isAdmin ? ' 👑' : '';
+                    const loginTime = new Date(user.loginTime).toLocaleString();
+                    
+                    return `
+                        <div style="padding: 10px; border-bottom: 1px solid #404040;">
+                            <div style="font-weight: bold; color: #fff;">${this.escapeHtml(user.nickname)}${adminBadge}</div>
+                            <div style="font-size: 11px; color: #888;">
+                                🟢 Онлайн • Вход: ${loginTime}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
 
+            updateAllStats() {
+                const activeUsers = this.getActiveUsers();
+                const messages = this.getGlobalData('messages') || [];
+                const keys = this.getGlobalData('keys') || [];
+                
+                // Основные счетчики
+                document.getElementById('onlineCount').textContent = activeUsers.length;
+                document.getElementById('messageCount').textContent = messages.length;
+                document.getElementById('keyCount').textContent = keys.length;
+                
+                // Счетчики в панели пользователей
+                document.getElementById('usersOnlineCount').textContent = this.currentUser ? 
+                    Math.max(0, activeUsers.length - 1) : 0;
+                
+                // Админские счетчики
                 if (this.isAdmin) {
-                    document.getElementById('totalUsers').textContent = this.users.length;
-                    document.getElementById('onlineUsers').textContent = this.users.length;
-                    document.getElementById('totalMessages').textContent = this.messages.length;
+                    document.getElementById('totalUsers').textContent = this.getTotalUsersCount();
+                    document.getElementById('adminOnlineUsers').textContent = activeUsers.length;
+                    document.getElementById('totalMessages').textContent = messages.length;
                 }
+                
+                // Обновляем списки
+                this.updateUsersList();
+                if (this.isAdmin) {
+                    this.updateAdminUsersList();
+                    this.updateAdminKeysDisplay();
+                }
+            }
+
+            getTotalUsersCount() {
+                // Подсчитываем уникальных пользователей по никнеймам из сообщений
+                const messages = this.getGlobalData('messages') || [];
+                const uniqueUsers = new Set();
+                
+                messages.forEach(msg => {
+                    if (msg.sender && msg.sender !== 'Система') {
+                        uniqueUsers.add(msg.sender);
+                    }
+                });
+                
+                return uniqueUsers.size;
             }
 
             showSection(sectionName) {
@@ -822,27 +1014,24 @@
                 }
 
                 if (sectionName === 'chat') {
-                    this.loadMessages();
+                    this.loadAndDisplayMessages();
+                    this.updateAllStats();
+                } else if (sectionName === 'admin' && this.isAdmin) {
+                    this.updateAllStats();
                 }
-            }
-
-            loadMessages() {
-                const messagesArea = document.getElementById('messagesArea');
-                messagesArea.innerHTML = '';
-                
-                this.messages.slice(-50).forEach(msg => {
-                    this.addMessage(msg.text, msg.sender, msg.senderId === this.currentUser.id);
-                });
             }
 
             logout() {
                 if (confirm('Выйти из чата?')) {
-                    // Удаляем пользователя из списка
-                    this.users = this.users.filter(u => u.id !== this.currentUser.id);
-                    this.saveData('users', this.users);
+                    // Добавляем системное сообщение о выходе
+                    if (this.currentUser) {
+                        this.addSystemMessage(`${this.currentUser.nickname} покинул чат`);
+                        this.removeActiveUser();
+                    }
 
                     this.currentUser = null;
                     this.isAdmin = false;
+                    this.sessionId = null;
 
                     // Сброс интерфейса
                     document.getElementById('nav-chat').classList.add('hidden');
@@ -853,10 +1042,32 @@
                     document.getElementById('userInfo').textContent = 'Не авторизован';
                     document.getElementById('accessKey').value = '';
                     document.getElementById('nickname').value = '';
+                    document.getElementById('accessKey').classList.remove('error');
+                    document.getElementById('nickname').classList.remove('error');
+                    document.getElementById('generatedKey').innerHTML = '';
                     
                     this.showSection('auth');
                     this.showNotification('Вы вышли из чата', 'success');
-                    this.updateStats();
+                    this.updateAllStats();
+                }
+            }
+
+            // Глобальное хранилище данных
+            setGlobalData(key, data) {
+                try {
+                    localStorage.setItem('scp_global_' + key, JSON.stringify(data));
+                } catch (error) {
+                    console.error('Ошибка сохранения:', error);
+                }
+            }
+
+            getGlobalData(key) {
+                try {
+                    const data = localStorage.getItem('scp_global_' + key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Ошибка загрузки:', error);
+                    return null;
                 }
             }
 
@@ -874,7 +1085,7 @@
                     if (notification.parentNode) {
                         notification.remove();
                     }
-                }, 3000);
+                }, 4000);
             }
 
             escapeHtml(text) {
@@ -885,7 +1096,9 @@
 
             copyToClipboard(text) {
                 if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text);
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showNotification('Скопировано в буфер обмена', 'success');
+                    });
                 } else {
                     // Fallback для старых браузеров
                     const textArea = document.createElement('textarea');
@@ -894,26 +1107,13 @@
                     textArea.style.left = '-999999px';
                     document.body.appendChild(textArea);
                     textArea.select();
-                    document.execCommand('copy');
+                    try {
+                        document.execCommand('copy');
+                        this.showNotification('Скопировано в буфер обмена', 'success');
+                    } catch (err) {
+                        this.showNotification('Не удалось скопировать', 'error');
+                    }
                     document.body.removeChild(textArea);
-                }
-            }
-
-            saveData(key, data) {
-                try {
-                    localStorage.setItem('scp_' + key, JSON.stringify(data));
-                } catch (error) {
-                    console.error('Ошибка сохранения:', error);
-                }
-            }
-
-            loadData(key) {
-                try {
-                    const data = localStorage.getItem('scp_' + key);
-                    return data ? JSON.parse(data) : null;
-                } catch (error) {
-                    console.error('Ошибка загрузки:', error);
-                    return null;
                 }
             }
         }
@@ -921,22 +1121,29 @@
         // Функция для демо-ключа
         function useAdminKey() {
             document.getElementById('accessKey').value = 'ADMIN_MASTER_2024_SECURECHAT_PRO_XK7N9P2Q';
-            document.getElementById('nickname').value = 'Admin';
             document.getElementById('nickname').focus();
         }
 
         // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
-            window.app = new SimpleSecureChat();
+            window.app = new SecureChatPro();
             console.log('🔒 SecureChat Pro загружен и готов к работе');
         });
 
-        // Защита от случайного закрытия
+        // Очистка при закрытии страницы
         window.addEventListener('beforeunload', function(e) {
             if (window.app && window.app.currentUser) {
+                window.app.removeActiveUser();
                 e.preventDefault();
                 e.returnValue = 'Вы уверены, что хотите покинуть чат?';
                 return e.returnValue;
+            }
+        });
+
+        // Очистка при уходе со страницы
+        window.addEventListener('unload', function() {
+            if (window.app && window.app.currentUser) {
+                window.app.removeActiveUser();
             }
         });
     </script>
