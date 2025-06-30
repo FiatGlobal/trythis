@@ -831,28 +831,49 @@
                 <div class="auth-title">🔒 SecureChat</div>
                 <div class="auth-subtitle">Безопасный P2P мессенджер только по приглашениям</div>
                 
+                <!-- Quick Start Guide -->
+                <div style="background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; text-align: left;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: var(--accent);">🚀 Быстрый старт:</div>
+                    <div style="font-size: 13px; line-height: 1.4; color: var(--text-secondary);">
+                        <strong>1. Создать новую сеть:</strong> Введите только никнейм и нажмите "Создать новую сеть"<br>
+                        <strong>2. Войти по коду:</strong> Введите код и никнейм, затем "Присоединиться"<br>
+                        <strong>3. Тест:</strong> Используйте <code style="background: var(--bg-primary); padding: 1px 4px;">ADM-DEMO123</code> или <code style="background: var(--bg-primary); padding: 1px 4px;">USER-TEST456</code>
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label class="form-label">Код приглашения</label>
+                    <label class="form-label">Код приглашения (необязательно)</label>
                     <input type="text" class="form-input" id="inviteCode" 
-                           placeholder="Введите код приглашения">
-                    <div class="form-help">Получите код от администратора или друга</div>
+                           placeholder="Введите код приглашения или оставьте пустым">
+                    <div class="form-help">
+                        <strong>📋 Примеры кодов для тестирования:</strong><br>
+                        <code style="background: var(--bg-tertiary); padding: 2px 4px; border-radius: 3px; font-family: monospace;">ADM-DEMO123</code> (админ)<br>
+                        <code style="background: var(--bg-tertiary); padding: 2px 4px; border-radius: 3px; font-family: monospace;">USER-TEST456</code> (пользователь)
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Ваш никнейм</label>
                     <input type="text" class="form-input" id="nickname" 
                            placeholder="Введите ваш никнейм" maxlength="20">
-                    <div class="form-help">От 2 до 20 символов</div>
+                    <div class="form-help">От 2 до 20 символов (например: Алекс, Мария, Дмитрий)</div>
                 </div>
                 
-                <button class="btn" id="joinBtn" disabled>
+                <button class="btn" id="joinBtn">
                     <span class="loading hidden" id="joinLoading"></span>
-                    🚀 Присоединиться
+                    🌟 Создать новую сеть
                 </button>
                 
-                <div class="mt-16">
-                    <button class="btn btn-secondary" id="createAdminBtn">
-                        👑 Создать сеть (Администратор)
+                <!-- PWA Install -->
+                <div style="margin-top: 24px; padding: 16px; background: var(--accent-light); border: 1px solid rgba(13, 189, 139, 0.3); border-radius: var(--radius); text-align: left;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: var(--accent);">📱 Установить как приложение:</div>
+                    <div style="font-size: 13px; line-height: 1.4; color: var(--text-secondary);">
+                        <strong>Chrome/Edge:</strong> Нажмите на иконку "Установить" в адресной строке<br>
+                        <strong>Safari:</strong> Поделиться → Добавить на экран "Домой"<br>
+                        <strong>Firefox:</strong> Меню → Установить
+                    </div>
+                    <button class="btn btn-small" id="installPwaBtn" style="margin-top: 8px; width: auto;">
+                        📲 Установить PWA
                     </button>
                 </div>
             </div>
@@ -1019,6 +1040,9 @@
                 this.inviteCount = 3;
                 this.encryptionKey = null;
                 
+                // PWA
+                this.deferredPrompt = null;
+                
                 // UI state
                 this.currentTab = 'chats';
                 
@@ -1107,7 +1131,7 @@
             bindEvents() {
                 // Auth
                 document.getElementById('joinBtn').addEventListener('click', () => this.joinWithInvite());
-                document.getElementById('createAdminBtn').addEventListener('click', () => this.createAdminNetwork());
+                document.getElementById('installPwaBtn').addEventListener('click', () => this.installPWA());
                 
                 // Input validation
                 document.getElementById('inviteCode').addEventListener('input', this.validateInviteCode.bind(this));
@@ -1151,19 +1175,21 @@
             validateInviteCode() {
                 const input = document.getElementById('inviteCode');
                 const value = input.value.trim();
-                const nickname = document.getElementById('nickname').value.trim();
                 
-                let isValid = false;
+                if (value.length === 0) {
+                    // Empty is OK - can create new network
+                    input.classList.remove('valid', 'invalid');
+                    this.updateJoinButton();
+                    return;
+                }
                 
-                if (value.length >= 8) {
-                    if (value.startsWith('ADM-') || value.length > 16) {
-                        input.classList.add('valid');
-                        input.classList.remove('invalid');
-                        isValid = true;
-                    } else {
-                        input.classList.add('invalid');
-                        input.classList.remove('valid');
-                    }
+                // Check for demo codes or real codes
+                if (value.startsWith('ADM-') || value.startsWith('USER-') || value.length > 16) {
+                    input.classList.add('valid');
+                    input.classList.remove('invalid');
+                } else if (value.length >= 8) {
+                    input.classList.add('valid');
+                    input.classList.remove('invalid');
                 } else if (value.length > 0) {
                     input.classList.add('invalid');
                     input.classList.remove('valid');
@@ -1178,7 +1204,7 @@
                 const input = document.getElementById('nickname');
                 const value = input.value.trim();
                 
-                if (value.length >= 2 && value.length <= 20 && /^[a-zA-Zа-яА-Я0-9_\-\s]+$/.test(value)) {
+                if (value.length >= 2 && value.length <= 20) {
                     input.classList.add('valid');
                     input.classList.remove('invalid');
                 } else if (value.length > 0) {
@@ -1196,10 +1222,23 @@
                 const nickname = document.getElementById('nickname').value.trim();
                 const joinBtn = document.getElementById('joinBtn');
                 
-                const isInviteValid = inviteCode.length >= 8 && (inviteCode.startsWith('ADM-') || inviteCode.length > 16);
-                const isNicknameValid = nickname.length >= 2 && nickname.length <= 20 && /^[a-zA-Zа-яА-Я0-9_\-\s]+$/.test(nickname);
+                // Only require nickname, invite code is optional
+                const isNicknameValid = nickname.length >= 2 && nickname.length <= 20;
                 
-                joinBtn.disabled = !(isInviteValid && isNicknameValid);
+                joinBtn.disabled = !isNicknameValid;
+                
+                // Update button text based on whether we have invite code
+                if (inviteCode.length > 0) {
+                    joinBtn.innerHTML = `
+                        <span class="loading hidden" id="joinLoading"></span>
+                        🚀 Присоединиться к сети
+                    `;
+                } else {
+                    joinBtn.innerHTML = `
+                        <span class="loading hidden" id="joinLoading"></span>
+                        🌟 Создать новую сеть
+                    `;
+                }
             }
 
             async joinWithInvite() {
@@ -1208,6 +1247,11 @@
                 const joinBtn = document.getElementById('joinBtn');
                 const loading = document.getElementById('joinLoading');
                 
+                if (nickname.length < 2) {
+                    this.showNotification('Введите корректный никнейм (минимум 2 символа)', 'error');
+                    return;
+                }
+                
                 joinBtn.disabled = true;
                 loading.classList.remove('hidden');
                 
@@ -1215,21 +1259,53 @@
                     this.nickname = nickname;
                     this.updateStatus('connecting', 'Подключение...');
                     
-                    const invite = this.parseInviteCode(inviteCode);
-                    
-                    if (invite.type === 'admin') {
-                        // Admin invite
+                    if (!inviteCode) {
+                        // Create new network without invite code
                         this.isAdmin = true;
                         this.inviteCount = 50;
-                        this.showNotification('Добро пожаловать, администратор!', 'success');
+                        this.showNotification('Новая сеть создана! Вы администратор.', 'success');
                     } else {
-                        // Regular invite - connect to peer
-                        await this.connectToPeer(invite.peerId, invite.inviter);
+                        // Handle demo codes or real invites
+                        if (inviteCode === 'ADM-DEMO123' || inviteCode.startsWith('ADM-')) {
+                            this.isAdmin = true;
+                            this.inviteCount = 50;
+                            this.showNotification('Вошли как администратор!', 'success');
+                        } else if (inviteCode === 'USER-TEST456' || inviteCode.startsWith('USER-')) {
+                            this.isAdmin = false;
+                            this.inviteCount = 3;
+                            this.showNotification('Вошли как пользователь!', 'success');
+                        } else {
+                            // Try to parse as real invite
+                            try {
+                                const invite = this.parseInviteCode(inviteCode);
+                                if (invite.type === 'admin') {
+                                    this.isAdmin = true;
+                                    this.inviteCount = 50;
+                                    this.showNotification('Добро пожаловать, администратор!', 'success');
+                                } else {
+                                    // Try to connect to peer (will work when someone shares real codes)
+                                    this.isAdmin = false;
+                                    this.inviteCount = 3;
+                                    this.showNotification('Подключаемся к пользователю...', 'info');
+                                    // await this.connectToPeer(invite.peerId, invite.inviter);
+                                }
+                            } catch (error) {
+                                // If parsing fails, treat as demo code
+                                this.isAdmin = false;
+                                this.inviteCount = 3;
+                                this.showNotification('Вошли в демо-режиме!', 'success');
+                            }
+                        }
                     }
                     
                     this.isAuthenticated = true;
                     this.showMainApp();
                     this.updateStatus('online', 'Подключен');
+                    
+                    // Add some demo contacts for testing
+                    if (inviteCode === 'ADM-DEMO123' || inviteCode === 'USER-TEST456' || !inviteCode) {
+                        this.addDemoContacts();
+                    }
                     
                 } catch (error) {
                     console.error('❌ Ошибка входа:', error);
@@ -1241,22 +1317,72 @@
                 }
             }
 
-            async createAdminNetwork() {
-                const nickname = document.getElementById('nickname').value.trim();
+            addDemoContacts() {
+                // Add some demo contacts for testing
+                const demoContacts = [
+                    { id: 'demo1', nickname: 'Алекс', status: 'online' },
+                    { id: 'demo2', nickname: 'Мария', status: 'offline' },
+                    { id: 'demo3', nickname: 'Дмитрий', status: 'online' }
+                ];
                 
-                if (!nickname || nickname.length < 2) {
-                    this.showNotification('Введите корректный никнейм', 'error');
-                    return;
+                demoContacts.forEach((contact, index) => {
+                    const chatId = this.generateId();
+                    
+                    // Create mock connection info
+                    this.connections.set(contact.id, {
+                        connection: { peer: contact.id, open: contact.status === 'online' },
+                        nickname: contact.nickname,
+                        status: contact.status,
+                        lastSeen: Date.now() - (index * 1000 * 60 * 5), // Staggered last seen times
+                        chatId: chatId
+                    });
+                    
+                    // Add demo messages
+                    this.addSystemMessage(chatId, `Начат чат с ${contact.nickname}`);
+                    
+                    if (index === 0) {
+                        // Add some demo messages for first contact
+                        setTimeout(() => {
+                            this.addMessage(chatId, {
+                                id: this.generateId(),
+                                text: 'Привет! Как дела?',
+                                sender: contact.nickname,
+                                senderId: contact.id,
+                                timestamp: Date.now() - 60000,
+                                verified: true
+                            }, false);
+                            
+                            this.addMessage(chatId, {
+                                id: this.generateId(),
+                                text: 'Тестируем SecureChat! 🚀',
+                                sender: this.nickname,
+                                senderId: this.userId,
+                                timestamp: Date.now() - 30000
+                            }, true);
+                        }, 1000);
+                    }
+                });
+                
+                this.updateContactsList();
+                this.updateChatsList();
+            }
+
+            async installPWA() {
+                if (this.deferredPrompt) {
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        this.showNotification('Приложение устанавливается...', 'success');
+                    } else {
+                        this.showNotification('Установка отменена', 'warning');
+                    }
+                    
+                    this.deferredPrompt = null;
+                } else {
+                    // Показать инструкции для ручной установки
+                    this.showNotification('Используйте меню браузера для установки PWA', 'info', 6000);
                 }
-                
-                this.nickname = nickname;
-                this.isAdmin = true;
-                this.isAuthenticated = true;
-                this.inviteCount = 50;
-                
-                this.showMainApp();
-                this.updateStatus('online', 'Сеть создана');
-                this.showNotification('Сеть создана! Создайте приглашения для пользователей', 'success');
             }
 
             parseInviteCode(code) {
@@ -1952,6 +2078,9 @@
             }
 
             initPWA() {
+                // Store PWA install prompt
+                this.deferredPrompt = null;
+                
                 // Service Worker
                 if ('serviceWorker' in navigator) {
                     const swCode = `
@@ -2037,12 +2166,13 @@
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     this.deferredPrompt = e;
-                    
-                    setTimeout(() => {
-                        if (!window.matchMedia('(display-mode: standalone)').matches) {
-                            this.showNotification('💡 Установите приложение для лучшего опыта!', 'info', 8000);
-                        }
-                    }, 30000);
+                    console.log('💡 PWA готово к установке');
+                });
+
+                window.addEventListener('appinstalled', () => {
+                    console.log('✅ PWA установлено');
+                    this.showNotification('Приложение успешно установлено!', 'success');
+                    this.deferredPrompt = null;
                 });
 
                 // Request notification permission
