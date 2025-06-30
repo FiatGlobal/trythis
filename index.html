@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureChat P2P</title>
-    <meta name="description" content="Децентрализованный мессенджер только по приглашениям">
+    <meta name="description" content="Децентрализованный мессенджер с end-to-end шифрованием">
     
     <!-- PWA -->
     <meta name="theme-color" content="#0DBD8B">
@@ -12,9 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SecureChat">
     
-    <!-- Простые иконки -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230DBD8B'/%3E%3Ctext x='16' y='20' text-anchor='middle' font-size='14' fill='white'%3E🔒%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Ccircle cx='90' cy='90' r='80' fill='%230DBD8B'/%3E%3Ctext x='90' y='110' text-anchor='middle' font-size='80' fill='white'%3E🔒%3C/text%3E%3C/svg%3E">
+    <!-- Icons -->
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMwREJEOEIiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTggOGgtMVY2YzAtMi43Ni0yLjI0LTUtNS01UzIgMy4yNCAyIDZ2Mkg2YzEuMSAwIDIgLjkgMiAydjEwYzAgMS4xLS45IDItMiAySDZjLTEuMSAwLTItLjktMi0yVjEwYzAtMS4xLjktMiAyLTJoMVY2YzAtMS42NiAxLjM0LTMgMy0zczMgMS4zNCAzIDN2Mkg2djEwaDEyVjEweiIvPgo8L3N2Zz4KPC9zdmc+">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjkwIiBjeT0iOTAiIHI9IjkwIiBmaWxsPSIjMERCRDhCIi8+CjxzdmcgeD0iNDUiIHk9IjQ1IiB3aWR0aD0iOTAiIGhlaWdodD0iOTAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPgo8cGF0aCBkPSJNMTggOGgtMVY2YzAtMi43Ni0yLjI0LTUtNS01UzIgMy4yNCAyIDZ2Mkg2YzEuMSAwIDIgLjkgMiAydjEwYzAgMS4xLS45IDItMiAySDZjLTEuMSAwLTItLjktMi0yVjEwYzAtMS4xLjktMiAyLTJoMVY2YzAtMS42NiAxLjM0LTMgMy0zczMgMS4zNCAzIDN2Mkg2djEwaDEyVjEweiIvPgo8L3N2Zz4KPC9zdmc+">
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -29,6 +29,7 @@
             --text-tertiary: #6E7681;
             --accent: #0DBD8B;
             --accent-hover: #0A9B6E;
+            --accent-light: rgba(13, 189, 139, 0.1);
             --danger: #F85149;
             --warning: #D29922;
             --success: #3FB950;
@@ -66,10 +67,11 @@
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease;
         }
 
         .sidebar-header {
-            padding: 20px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
             background: linear-gradient(135deg, var(--accent), var(--accent-hover));
         }
@@ -78,7 +80,7 @@
             color: white;
             font-size: 18px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -87,15 +89,20 @@
         .app-subtitle {
             color: rgba(255, 255, 255, 0.8);
             font-size: 12px;
-            font-weight: 500;
         }
 
-        .status {
+        .user-info {
             margin-top: 12px;
             padding: 8px 12px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: var(--radius);
             font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -117,62 +124,57 @@
             50% { opacity: 0.6; }
         }
 
-        /* Main container */
-        .main-container {
+        /* Auth Screen */
+        .auth-screen {
             flex: 1;
-            padding: 20px;
-            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .step {
-            display: none;
+        .auth-container {
             max-width: 400px;
-            margin: 0 auto;
-            animation: fadeIn 0.3s ease;
+            width: 100%;
+            text-align: center;
         }
 
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .step-title {
-            font-size: 24px;
-            font-weight: 600;
+        .auth-title {
+            font-size: 32px;
+            font-weight: 700;
             margin-bottom: 8px;
-            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .step-desc {
+        .auth-subtitle {
             color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.6;
+            margin-bottom: 40px;
+            font-size: 16px;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 500;
             color: var(--text-primary);
-            font-size: 14px;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 16px;
             background: var(--bg-tertiary);
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: var(--radius);
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 16px;
             font-family: inherit;
             transition: all 0.2s;
         }
@@ -180,11 +182,25 @@
         .form-input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(13, 189, 139, 0.1);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .form-input.valid {
+            border-color: var(--success);
+        }
+
+        .form-input.invalid {
+            border-color: var(--danger);
         }
 
         .form-input::placeholder {
             color: var(--text-tertiary);
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
         }
 
         .btn {
@@ -192,23 +208,25 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 12px 20px;
+            padding: 14px 24px;
             background: var(--accent);
             color: white;
             border: none;
             border-radius: var(--radius);
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             font-family: inherit;
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
             width: 100%;
+            min-height: 50px;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: var(--accent-hover);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .btn:disabled {
@@ -220,10 +238,10 @@
         .btn-secondary {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background: var(--bg-hover);
             border-color: var(--border-hover);
         }
@@ -234,19 +252,446 @@
 
         .btn-small {
             padding: 8px 16px;
-            font-size: 12px;
+            font-size: 14px;
+            min-height: auto;
             width: auto;
         }
 
-        /* Invite System */
-        .invite-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        /* Contacts */
+        .contacts-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 16px;
         }
 
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .contact-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+            transform: translateX(2px);
+        }
+
+        .contact-item.active {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* Chat */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .chat-details {
+            flex: 1;
+        }
+
+        .chat-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .chat-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .encryption-badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            border: 1px solid rgba(13, 189, 139, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Messages */
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .message {
+            max-width: 70%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .message.own {
+            align-self: flex-end;
+        }
+
+        .message.system {
+            align-self: center;
+            max-width: 80%;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-header {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        .message-sender {
+            font-weight: 500;
+        }
+
+        .message-time {
+            color: var(--text-tertiary);
+        }
+
+        .message-status {
+            color: var(--success);
+        }
+
+        .message-content {
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            word-wrap: break-word;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.own .message-content {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.system .message-content {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* Message Input */
+        .message-input-container {
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .message-form {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-primary);
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.4;
+            transition: border-color 0.2s;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .message-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .send-btn {
+            min-width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            padding: 0;
+            background: var(--accent);
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.3;
+        }
+
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-text {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Invite codes */
         .invite-code {
             font-family: 'Monaco', monospace;
             background: var(--bg-primary);
@@ -274,14 +719,15 @@
         .invite-list {
             max-height: 300px;
             overflow-y: auto;
+            margin-top: 16px;
         }
 
         .invite-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
-            background: var(--bg-primary);
+            padding: 12px;
+            background: var(--bg-tertiary);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             margin-bottom: 8px;
@@ -289,205 +735,17 @@
 
         .invite-info {
             flex: 1;
+            min-width: 0;
         }
 
         .invite-code-short {
             font-family: 'Monaco', monospace;
             font-size: 12px;
             color: var(--accent);
+            margin-bottom: 2px;
         }
 
         .invite-status {
-            font-size: 11px;
-            color: var(--text-tertiary);
-        }
-
-        /* Chat */
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-primary);
-        }
-
-        .chat-header {
-            padding: 16px 20px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .chat-info {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .encryption-badge {
-            background: rgba(13, 189, 139, 0.1);
-            color: var(--accent);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 500;
-            border: 1px solid rgba(13, 189, 139, 0.3);
-        }
-
-        .messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .message {
-            max-width: 70%;
-            animation: slideUp 0.3s ease;
-        }
-
-        .message.own {
-            align-self: flex-end;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message-header {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 4px;
-            font-size: 11px;
-            color: var(--text-tertiary);
-        }
-
-        .message-content {
-            background: var(--bg-secondary);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-
-        .message.own .message-content {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-
-        .message.system .message-content {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            font-style: italic;
-            text-align: center;
-            border-radius: 20px;
-        }
-
-        /* Message Input */
-        .message-input-container {
-            padding: 16px 20px;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-        }
-
-        .message-form {
-            display: flex;
-            gap: 12px;
-            align-items: end;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 12px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            color: var(--text-primary);
-            resize: none;
-            min-height: 40px;
-            max-height: 120px;
-            font-family: inherit;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .message-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .send-btn {
-            min-width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            padding: 0;
-            background: var(--accent);
-            margin: 0;
-        }
-
-        .send-btn:disabled {
-            opacity: 0.3;
-        }
-
-        /* Peers */
-        .peers-list {
-            padding: 0 20px 20px;
-        }
-
-        .peers-header {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .peer {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 8px;
-        }
-
-        .peer-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 12px;
-        }
-
-        .peer-info {
-            flex: 1;
-        }
-
-        .peer-name {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .peer-status {
             font-size: 11px;
             color: var(--text-tertiary);
         }
@@ -498,12 +756,12 @@
             top: 20px;
             right: 20px;
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: var(--radius);
-            padding: 16px;
-            max-width: 300px;
+            padding: 16px 20px;
+            max-width: 350px;
             box-shadow: var(--shadow);
-            z-index: 1000;
+            z-index: 1001;
             animation: slideInRight 0.3s ease;
         }
 
@@ -534,14 +792,20 @@
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                width: 100%;
-                max-height: 50vh;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 100;
+                transform: translateX(-100%);
             }
             
-            .app {
-                flex-direction: column;
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .chat-container {
+                width: 100%;
             }
             
             .message {
@@ -552,108 +816,183 @@
         /* Utilities */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
-        .mb-16 { margin-bottom: 16px; }
-        .mt-16 { margin-top: 16px; }
         .text-success { color: var(--success); }
         .text-danger { color: var(--danger); }
         .text-warning { color: var(--warning); }
+        .mb-16 { margin-bottom: 16px; }
+        .mt-16 { margin-top: 16px; }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="sidebar">
+    <div class="app" id="app">
+        <!-- Auth Screen -->
+        <div class="auth-screen" id="authScreen">
+            <div class="auth-container">
+                <div class="auth-title">🔒 SecureChat</div>
+                <div class="auth-subtitle">Безопасный P2P мессенджер только по приглашениям</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Код приглашения</label>
+                    <input type="text" class="form-input" id="inviteCode" 
+                           placeholder="Введите код приглашения">
+                    <div class="form-help">Получите код от администратора или друга</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Ваш никнейм</label>
+                    <input type="text" class="form-input" id="nickname" 
+                           placeholder="Введите ваш никнейм" maxlength="20">
+                    <div class="form-help">От 2 до 20 символов</div>
+                </div>
+                
+                <button class="btn" id="joinBtn" disabled>
+                    <span class="loading hidden" id="joinLoading"></span>
+                    🚀 Присоединиться
+                </button>
+                
+                <div class="mt-16">
+                    <button class="btn btn-secondary" id="createAdminBtn">
+                        👑 Создать сеть (Администратор)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div class="sidebar hidden" id="sidebar">
             <div class="sidebar-header">
                 <div class="app-title">
                     🔒 SecureChat
                 </div>
-                <div class="app-subtitle">Только по приглашениям</div>
-                <div class="status">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">Инициализация...</span>
+                <div class="app-subtitle">P2P Мессенджер</div>
+                <div class="user-info">
+                    <span id="userNickname">Пользователь</span>
+                    <div class="status">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Офлайн</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="main-container">
-                <!-- Шаг 1: Вход по приглашению -->
-                <div class="step active" id="step-invite">
-                    <div class="step-title">🎫 Вход по приглашению</div>
-                    <div class="step-desc">
-                        Введите код приглашения, полученный от администратора или друга
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Код приглашения</label>
-                        <input type="text" class="form-input" id="inviteCode" 
-                               placeholder="Вставьте код приглашения"
-                               style="text-transform: uppercase;">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Ваш никнейм</label>
-                        <input type="text" class="form-input" id="nickname" 
-                               placeholder="Введите никнейм (2-20 символов)" 
-                               maxlength="20">
-                    </div>
-                    
-                    <button class="btn" id="joinBtn">
-                        🚀 Присоединиться
-                    </button>
-                </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="chats">💬 Чаты</button>
+                <button class="nav-tab" data-tab="contacts">👥 Контакты</button>
+                <button class="nav-tab" data-tab="invites">🎫 Инвайты</button>
+            </div>
 
-                <!-- Шаг 2: Управление приглашениями -->
-                <div class="step" id="step-manage">
-                    <div class="step-title">👥 Управление</div>
-                    <div class="step-desc">
-                        Создайте приглашения для друзей (осталось: <span id="inviteCount">3</span>)
-                    </div>
-                    
-                    <button class="btn mb-16" id="createInviteBtn">
-                        ➕ Создать приглашение
-                    </button>
-                    
-                    <div class="invite-list" id="inviteList">
-                        <!-- Список приглашений -->
-                    </div>
-                    
-                    <button class="btn btn-secondary" id="gotoChatBtn">
-                        💬 Перейти к чату
-                    </button>
+            <!-- Chats Tab -->
+            <div class="contacts-section" id="chatsTab">
+                <div class="section-header">
+                    <div class="section-title">Активные чаты</div>
+                    <button class="btn btn-small" id="newChatBtn">➕</button>
+                </div>
+                <div id="chatsList">
+                    <!-- Chat items will be added here -->
                 </div>
             </div>
 
-            <!-- Список участников -->
-            <div class="peers-list hidden" id="peersList">
-                <div class="peers-header">Участники</div>
-                <div id="peersContainer"></div>
+            <!-- Contacts Tab -->
+            <div class="contacts-section hidden" id="contactsTab">
+                <div class="section-header">
+                    <div class="section-title">Контакты</div>
+                    <button class="btn btn-small" id="addContactBtn">➕</button>
+                </div>
+                <div id="contactsList">
+                    <!-- Contacts will be added here -->
+                </div>
+            </div>
+
+            <!-- Invites Tab -->
+            <div class="contacts-section hidden" id="invitesTab">
+                <div class="section-header">
+                    <div class="section-title">Приглашения</div>
+                    <button class="btn btn-small" id="createInviteBtn">✨ Создать</button>
+                </div>
+                <div>
+                    <div class="form-help mb-16">
+                        Осталось приглашений: <span id="inviteCount">0</span>
+                    </div>
+                    <div id="invitesList">
+                        <!-- Invites will be added here -->
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Chat Area -->
+        <!-- Chat Container -->
         <div class="chat-container hidden" id="chatContainer">
-            <div class="chat-header">
-                <div>
-                    <div class="chat-title" id="chatTitle">SecureChat</div>
-                    <div class="chat-info" id="chatInfo">Загрузка...</div>
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">💬</div>
+                <div class="empty-title">Выберите чат</div>
+                <div class="empty-text">
+                    Выберите существующий чат или создайте новый для начала общения
                 </div>
-                <div class="encryption-badge">🔐 E2E зашифровано</div>
+                <button class="btn btn-secondary" id="startChatBtn">Начать чат</button>
             </div>
-            
-            <div class="messages" id="messages">
-                <div class="message system">
-                    <div class="message-content">
-                        🎉 Добро пожаловать в SecureChat! Все сообщения защищены end-to-end шифрованием.
+
+            <!-- Active Chat -->
+            <div class="hidden" id="activeChat">
+                <div class="chat-header">
+                    <div class="chat-info">
+                        <div class="chat-avatar" id="chatAvatar">👤</div>
+                        <div class="chat-details">
+                            <div class="chat-title" id="chatTitle">Выберите чат</div>
+                            <div class="chat-subtitle" id="chatSubtitle">Нет активных соединений</div>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <div class="encryption-badge">
+                            🔐 E2E шифрование
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="messages" id="messages">
+                    <!-- Messages will be added here -->
+                </div>
+                
+                <div class="message-input-container">
+                    <div class="message-form">
+                        <textarea class="message-input" id="messageInput" 
+                                  placeholder="Введите сообщение..." 
+                                  rows="1" maxlength="2000"></textarea>
+                        <button class="btn send-btn" id="sendBtn" disabled>➤</button>
                     </div>
                 </div>
             </div>
-            
-            <div class="message-input-container">
-                <div class="message-form">
-                    <textarea class="message-input" id="messageInput" 
-                              placeholder="Введите сообщение..." 
-                              rows="1" maxlength="2000"></textarea>
-                    <button class="btn send-btn" id="sendBtn">➤</button>
-                </div>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div class="modal-overlay" id="addContactModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Добавить контакт</div>
+                <button class="modal-close" onclick="closeModal('addContactModal')">✕</button>
             </div>
+            <div class="form-group">
+                <label class="form-label">Код приглашения контакта</label>
+                <input type="text" class="form-input" id="contactInviteCode" 
+                       placeholder="Вставьте код приглашения">
+            </div>
+            <button class="btn" id="addContactConfirmBtn">Добавить контакт</button>
+        </div>
+    </div>
+
+    <!-- Create Invite Modal -->
+    <div class="modal-overlay" id="createInviteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Создать приглашение</div>
+                <button class="modal-close" onclick="closeModal('createInviteModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Описание (опционально)</label>
+                <input type="text" class="form-input" id="inviteDescription" 
+                       placeholder="Для кого это приглашение">
+            </div>
+            <button class="btn" id="createInviteConfirmBtn">Создать приглашение</button>
         </div>
     </div>
 
@@ -662,15 +1001,26 @@
     <script>
         class SecureChat {
             constructor() {
+                // Core properties
                 this.peer = null;
-                this.connections = new Map();
                 this.nickname = '';
                 this.userId = null;
+                this.isAdmin = false;
+                this.isAuthenticated = false;
+                
+                // Connections and chats
+                this.connections = new Map(); // peerId -> connection object
+                this.contacts = new Map(); // contactId -> contact info
+                this.chats = new Map(); // chatId -> chat data
+                this.activeChat = null;
+                
+                // Invites and crypto
                 this.invites = [];
                 this.inviteCount = 3;
                 this.encryptionKey = null;
-                this.messages = [];
-                this.isAdmin = false;
+                
+                // UI state
+                this.currentTab = 'chats';
                 
                 this.init();
             }
@@ -682,24 +1032,24 @@
                     await this.initCrypto();
                     await this.initPeer();
                     this.bindEvents();
-                    this.checkPWA();
+                    this.initPWA();
                     this.updateStatus('offline', 'Готов к подключению');
                     
-                    console.log('✅ SecureChat инициализирован');
+                    console.log('✅ SecureChat готов');
                 } catch (error) {
                     console.error('❌ Ошибка инициализации:', error);
-                    this.showNotification('Ошибка инициализации', 'error');
+                    this.showNotification('Ошибка инициализации приложения', 'error');
                 }
             }
 
             async initCrypto() {
                 try {
-                    this.encryptionKey = await window.crypto.subtle.generateKey(
+                    this.encryptionKey = await crypto.subtle.generateKey(
                         { name: 'AES-GCM', length: 256 },
                         true,
                         ['encrypt', 'decrypt']
                     );
-                    console.log('🔐 Криптография готова');
+                    console.log('🔐 Криптография инициализирована');
                 } catch (error) {
                     console.error('Ошибка криптографии:', error);
                     throw error;
@@ -715,44 +1065,58 @@
                                 { urls: 'stun:stun.l.google.com:19302' },
                                 { urls: 'stun:stun1.l.google.com:19302' },
                                 { urls: 'stun:stun2.l.google.com:19302' },
-                                { urls: 'stun:stun3.l.google.com:19302' }
+                                { urls: 'stun:stun3.l.google.com:19302' },
+                                { urls: 'stun:stun4.l.google.com:19302' }
                             ]
                         }
                     });
 
                     this.peer.on('open', (id) => {
                         this.userId = id;
-                        console.log('🆔 Peer ID:', id);
+                        console.log('🆔 Peer ID получен:', id);
                         resolve();
                     });
 
                     this.peer.on('connection', (conn) => {
-                        this.handleConnection(conn);
+                        this.handleIncomingConnection(conn);
                     });
 
                     this.peer.on('error', (error) => {
-                        console.error('PeerJS ошибка:', error);
+                        console.error('❌ PeerJS ошибка:', error);
                         if (error.type === 'peer-unavailable') {
                             this.showNotification('Пользователь недоступен', 'warning');
+                        } else if (error.type === 'network') {
+                            this.showNotification('Проблемы с сетью', 'error');
                         } else {
                             reject(error);
                         }
                     });
 
                     this.peer.on('disconnected', () => {
-                        console.log('🔌 Отключен от сервера');
-                        this.updateStatus('offline', 'Отключен');
+                        console.log('🔌 Отключен от PeerJS сервера');
+                        this.updateStatus('offline', 'Переподключение...');
+                        setTimeout(() => {
+                            if (!this.peer.destroyed) {
+                                this.peer.reconnect();
+                            }
+                        }, 3000);
                     });
                 });
             }
 
             bindEvents() {
-                // Join
+                // Auth
                 document.getElementById('joinBtn').addEventListener('click', () => this.joinWithInvite());
+                document.getElementById('createAdminBtn').addEventListener('click', () => this.createAdminNetwork());
                 
-                // Invite management
-                document.getElementById('createInviteBtn').addEventListener('click', () => this.createInvite());
-                document.getElementById('gotoChatBtn').addEventListener('click', () => this.showChat());
+                // Input validation
+                document.getElementById('inviteCode').addEventListener('input', this.validateInviteCode.bind(this));
+                document.getElementById('nickname').addEventListener('input', this.validateNickname.bind(this));
+                
+                // Navigation
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+                });
                 
                 // Chat
                 document.getElementById('sendBtn').addEventListener('click', () => this.sendMessage());
@@ -762,60 +1126,158 @@
                         this.sendMessage();
                     }
                 });
-
-                // Auto-resize textarea
                 document.getElementById('messageInput').addEventListener('input', this.autoResize);
                 
-                // Validation
-                document.getElementById('inviteCode').addEventListener('input', this.validateInviteCode);
-                document.getElementById('nickname').addEventListener('input', this.validateNickname);
+                // Buttons
+                document.getElementById('newChatBtn').addEventListener('click', () => this.openModal('addContactModal'));
+                document.getElementById('addContactBtn').addEventListener('click', () => this.openModal('addContactModal'));
+                document.getElementById('createInviteBtn').addEventListener('click', () => this.openModal('createInviteModal'));
+                document.getElementById('startChatBtn').addEventListener('click', () => this.openModal('addContactModal'));
+                
+                // Modal actions
+                document.getElementById('addContactConfirmBtn').addEventListener('click', () => this.addContact());
+                document.getElementById('createInviteConfirmBtn').addEventListener('click', () => this.createInvite());
+                
+                // Close modals on overlay click
+                document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.classList.remove('active');
+                        }
+                    });
+                });
+            }
+
+            validateInviteCode() {
+                const input = document.getElementById('inviteCode');
+                const value = input.value.trim();
+                const nickname = document.getElementById('nickname').value.trim();
+                
+                let isValid = false;
+                
+                if (value.length >= 8) {
+                    if (value.startsWith('ADM-') || value.length > 16) {
+                        input.classList.add('valid');
+                        input.classList.remove('invalid');
+                        isValid = true;
+                    } else {
+                        input.classList.add('invalid');
+                        input.classList.remove('valid');
+                    }
+                } else if (value.length > 0) {
+                    input.classList.add('invalid');
+                    input.classList.remove('valid');
+                } else {
+                    input.classList.remove('valid', 'invalid');
+                }
+                
+                this.updateJoinButton();
+            }
+
+            validateNickname() {
+                const input = document.getElementById('nickname');
+                const value = input.value.trim();
+                
+                if (value.length >= 2 && value.length <= 20 && /^[a-zA-Zа-яА-Я0-9_\-\s]+$/.test(value)) {
+                    input.classList.add('valid');
+                    input.classList.remove('invalid');
+                } else if (value.length > 0) {
+                    input.classList.add('invalid');
+                    input.classList.remove('valid');
+                } else {
+                    input.classList.remove('valid', 'invalid');
+                }
+                
+                this.updateJoinButton();
+            }
+
+            updateJoinButton() {
+                const inviteCode = document.getElementById('inviteCode').value.trim();
+                const nickname = document.getElementById('nickname').value.trim();
+                const joinBtn = document.getElementById('joinBtn');
+                
+                const isInviteValid = inviteCode.length >= 8 && (inviteCode.startsWith('ADM-') || inviteCode.length > 16);
+                const isNicknameValid = nickname.length >= 2 && nickname.length <= 20 && /^[a-zA-Zа-яА-Я0-9_\-\s]+$/.test(nickname);
+                
+                joinBtn.disabled = !(isInviteValid && isNicknameValid);
             }
 
             async joinWithInvite() {
-                const inviteCode = document.getElementById('inviteCode').value.trim().toUpperCase();
+                const inviteCode = document.getElementById('inviteCode').value.trim();
                 const nickname = document.getElementById('nickname').value.trim();
+                const joinBtn = document.getElementById('joinBtn');
+                const loading = document.getElementById('joinLoading');
                 
-                if (!this.validateInvite(inviteCode)) return;
-                if (!this.validateNick(nickname)) return;
-                
-                this.nickname = nickname;
-                this.updateStatus('connecting', 'Подключение...');
+                joinBtn.disabled = true;
+                loading.classList.remove('hidden');
                 
                 try {
-                    // Parse invite code
+                    this.nickname = nickname;
+                    this.updateStatus('connecting', 'Подключение...');
+                    
                     const invite = this.parseInviteCode(inviteCode);
                     
                     if (invite.type === 'admin') {
                         // Admin invite
                         this.isAdmin = true;
-                        this.inviteCount = 50; // Admin gets more invites
-                        this.showStep('step-manage');
+                        this.inviteCount = 50;
                         this.showNotification('Добро пожаловать, администратор!', 'success');
                     } else {
                         // Regular invite - connect to peer
-                        await this.connectToPeer(invite.peerId);
-                        this.showStep('step-manage');
+                        await this.connectToPeer(invite.peerId, invite.inviter);
                     }
                     
+                    this.isAuthenticated = true;
+                    this.showMainApp();
                     this.updateStatus('online', 'Подключен');
                     
                 } catch (error) {
-                    console.error('Ошибка подключения:', error);
-                    this.showNotification('Ошибка подключения', 'error');
+                    console.error('❌ Ошибка входа:', error);
+                    this.showNotification(error.message || 'Ошибка подключения', 'error');
                     this.updateStatus('offline', 'Ошибка');
+                } finally {
+                    joinBtn.disabled = false;
+                    loading.classList.add('hidden');
                 }
+            }
+
+            async createAdminNetwork() {
+                const nickname = document.getElementById('nickname').value.trim();
+                
+                if (!nickname || nickname.length < 2) {
+                    this.showNotification('Введите корректный никнейм', 'error');
+                    return;
+                }
+                
+                this.nickname = nickname;
+                this.isAdmin = true;
+                this.isAuthenticated = true;
+                this.inviteCount = 50;
+                
+                this.showMainApp();
+                this.updateStatus('online', 'Сеть создана');
+                this.showNotification('Сеть создана! Создайте приглашения для пользователей', 'success');
             }
 
             parseInviteCode(code) {
                 try {
-                    // Admin codes start with 'ADM-'
                     if (code.startsWith('ADM-')) {
-                        return { type: 'admin', code: code };
+                        return { type: 'admin', code };
                     }
                     
-                    // Regular invites are base64 encoded peer IDs
+                    // Decode base64 invite
                     const decoded = atob(code);
                     const data = JSON.parse(decoded);
+                    
+                    if (!data.peerId || !data.inviter || !data.timestamp) {
+                        throw new Error('Неверный формат приглашения');
+                    }
+                    
+                    // Check if invite is not too old (24 hours)
+                    const ageHours = (Date.now() - data.timestamp) / (1000 * 60 * 60);
+                    if (ageHours > 24) {
+                        throw new Error('Приглашение устарело');
+                    }
                     
                     return {
                         type: 'peer',
@@ -828,13 +1290,16 @@
                 }
             }
 
-            async connectToPeer(peerId) {
+            async connectToPeer(peerId, inviterName) {
                 return new Promise((resolve, reject) => {
+                    console.log('🔗 Подключение к:', peerId);
+                    
                     const conn = this.peer.connect(peerId);
+                    let resolved = false;
                     
                     conn.on('open', () => {
-                        console.log('✅ Подключен к:', peerId);
-                        this.handleConnection(conn);
+                        console.log('✅ Соединение установлено');
+                        this.handleConnection(conn, inviterName);
                         
                         // Send join message
                         conn.send({
@@ -844,62 +1309,82 @@
                             timestamp: Date.now()
                         });
                         
-                        resolve();
+                        if (!resolved) {
+                            resolved = true;
+                            resolve();
+                        }
                     });
                     
                     conn.on('error', (error) => {
-                        console.error('Ошибка подключения:', error);
-                        reject(error);
+                        console.error('❌ Ошибка соединения:', error);
+                        if (!resolved) {
+                            resolved = true;
+                            reject(new Error('Не удалось подключиться к пользователю'));
+                        }
                     });
                     
-                    // Timeout after 10 seconds
+                    // Timeout
                     setTimeout(() => {
-                        if (!conn.open) {
+                        if (!resolved) {
+                            resolved = true;
                             reject(new Error('Таймаут подключения'));
                         }
-                    }, 10000);
+                    }, 15000);
                 });
             }
 
-            handleConnection(conn) {
-                console.log('📞 Новое соединение:', conn.peer);
-                
-                this.connections.set(conn.peer, {
-                    connection: conn,
-                    nickname: 'Пользователь',
-                    status: 'connecting'
-                });
+            handleIncomingConnection(conn) {
+                console.log('📞 Входящее соединение:', conn.peer);
+                this.handleConnection(conn);
+            }
 
+            handleConnection(conn, contactName = null) {
+                const connectionInfo = {
+                    connection: conn,
+                    nickname: contactName || 'Пользователь',
+                    status: 'connecting',
+                    lastSeen: Date.now(),
+                    chatId: this.generateId()
+                };
+                
+                this.connections.set(conn.peer, connectionInfo);
+                
                 conn.on('data', (data) => {
                     this.handleMessage(data, conn);
                 });
 
                 conn.on('close', () => {
                     console.log('❌ Соединение закрыто:', conn.peer);
-                    this.connections.delete(conn.peer);
-                    this.updatePeersList();
+                    const connInfo = this.connections.get(conn.peer);
+                    if (connInfo) {
+                        connInfo.status = 'offline';
+                        this.updateContactsList();
+                        this.updateChatsList();
+                    }
                 });
 
                 conn.on('error', (error) => {
-                    console.error('Ошибка соединения:', error);
+                    console.error('❌ Ошибка соединения:', error);
                 });
+                
+                this.updateContactsList();
+                this.updateChatsList();
             }
 
             async handleMessage(data, conn) {
                 try {
+                    const connInfo = this.connections.get(conn.peer);
+                    if (!connInfo) return;
+                    
                     switch (data.type) {
                         case 'join':
                             console.log('👋 Пользователь присоединился:', data.nickname);
+                            connInfo.nickname = data.nickname;
+                            connInfo.status = 'online';
                             
-                            // Update connection info
-                            const connInfo = this.connections.get(conn.peer);
-                            if (connInfo) {
-                                connInfo.nickname = data.nickname;
-                                connInfo.status = 'online';
-                            }
-                            
-                            this.updatePeersList();
-                            this.addSystemMessage(`${data.nickname} присоединился`);
+                            this.addSystemMessage(connInfo.chatId, `${data.nickname} присоединился`);
+                            this.updateContactsList();
+                            this.updateChatsList();
                             
                             // Send welcome back
                             conn.send({
@@ -911,87 +1396,47 @@
 
                         case 'welcome':
                             console.log('🎉 Приветствие от:', data.nickname);
+                            connInfo.nickname = data.nickname;
+                            connInfo.status = 'online';
                             
-                            const welcomeConn = this.connections.get(conn.peer);
-                            if (welcomeConn) {
-                                welcomeConn.nickname = data.nickname;
-                                welcomeConn.status = 'online';
-                            }
-                            
-                            this.updatePeersList();
+                            this.updateContactsList();
+                            this.updateChatsList();
                             break;
 
                         case 'message':
                             console.log('💬 Сообщение от:', data.sender);
-                            const decrypted = await this.decryptMessage(data);
-                            this.addMessage(decrypted, false);
+                            const message = await this.decryptMessage(data);
+                            this.addMessage(connInfo.chatId, message, false);
+                            
+                            // Show notification if not in active chat
+                            if (this.activeChat !== connInfo.chatId) {
+                                this.showDesktopNotification(message.sender, message.text);
+                            }
                             break;
 
-                        case 'invite_request':
-                            // Handle invite requests from peers
-                            if (this.inviteCount > 0) {
-                                const invite = this.createPeerInvite();
-                                conn.send({
-                                    type: 'invite_response',
-                                    invite: invite
-                                });
-                            }
+                        case 'typing':
+                            this.handleTypingIndicator(conn.peer, data.typing);
                             break;
                     }
                 } catch (error) {
-                    console.error('Ошибка обработки сообщения:', error);
+                    console.error('❌ Ошибка обработки сообщения:', error);
                 }
-            }
-
-            createInvite() {
-                if (this.inviteCount <= 0) {
-                    this.showNotification('Лимит приглашений исчерпан', 'warning');
-                    return;
-                }
-
-                const invite = this.isAdmin ? this.createAdminInvite() : this.createPeerInvite();
-                
-                this.invites.push({
-                    code: invite,
-                    created: Date.now(),
-                    used: false,
-                    id: Math.random().toString(36).substr(2, 9)
-                });
-                
-                this.inviteCount--;
-                this.updateInviteCount();
-                this.updateInvitesList();
-                
-                this.showNotification('Приглашение создано!', 'success');
-            }
-
-            createAdminInvite() {
-                // Admin can create special admin invites
-                const adminCode = 'ADM-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-                return adminCode;
-            }
-
-            createPeerInvite() {
-                const inviteData = {
-                    peerId: this.userId,
-                    inviter: this.nickname,
-                    timestamp: Date.now()
-                };
-                
-                return btoa(JSON.stringify(inviteData));
             }
 
             async sendMessage() {
                 const input = document.getElementById('messageInput');
                 const text = input.value.trim();
+                const sendBtn = document.getElementById('sendBtn');
                 
-                if (!text) return;
+                if (!text || !this.activeChat) return;
                 
                 if (text.length > 2000) {
-                    this.showNotification('Сообщение слишком длинное', 'error');
+                    this.showNotification('Сообщение слишком длинное (максимум 2000 символов)', 'error');
                     return;
                 }
 
+                sendBtn.disabled = true;
+                
                 try {
                     const message = {
                         id: this.generateId(),
@@ -1002,18 +1447,23 @@
                     };
 
                     // Add locally
-                    this.addMessage(message, true);
+                    this.addMessage(this.activeChat, message, true);
                     
-                    // Encrypt and send to all peers
-                    const encrypted = await this.encryptMessage(message);
-                    this.broadcastMessage(encrypted);
+                    // Find connection for active chat
+                    const connection = this.findConnectionByChat(this.activeChat);
+                    if (connection) {
+                        const encrypted = await this.encryptMessage(message);
+                        connection.send(encrypted);
+                    }
                     
                     input.value = '';
                     this.autoResize({ target: input });
                     
                 } catch (error) {
-                    console.error('Ошибка отправки:', error);
+                    console.error('❌ Ошибка отправки:', error);
                     this.showNotification('Ошибка отправки сообщения', 'error');
+                } finally {
+                    sendBtn.disabled = false;
                 }
             }
 
@@ -1036,7 +1486,7 @@
                         timestamp: Date.now()
                     };
                 } catch (error) {
-                    console.error('Ошибка шифрования:', error);
+                    console.error('❌ Ошибка шифрования:', error);
                     throw error;
                 }
             }
@@ -1056,9 +1506,10 @@
                     message.verified = true;
                     return message;
                 } catch (error) {
-                    console.error('Ошибка расшифровки:', error);
+                    console.error('❌ Ошибка расшифровки:', error);
                     return {
-                        text: '[Зашифрованное сообщение]',
+                        id: this.generateId(),
+                        text: '[Зашифрованное сообщение - ошибка расшифровки]',
                         sender: encryptedData.sender,
                         timestamp: encryptedData.timestamp,
                         verified: false
@@ -1066,22 +1517,45 @@
                 }
             }
 
-            broadcastMessage(message) {
-                this.connections.forEach((connInfo) => {
-                    if (connInfo.connection.open) {
-                        try {
-                            connInfo.connection.send(message);
-                        } catch (error) {
-                            console.error('Ошибка отправки:', error);
-                        }
-                    }
-                });
+            addMessage(chatId, message, isOwn) {
+                if (!this.chats.has(chatId)) {
+                    this.chats.set(chatId, {
+                        id: chatId,
+                        messages: [],
+                        lastMessage: null,
+                        lastActivity: Date.now()
+                    });
+                }
+                
+                const chat = this.chats.get(chatId);
+                chat.messages.push(message);
+                chat.lastMessage = message;
+                chat.lastActivity = Date.now();
+                
+                // Update UI if this is the active chat
+                if (this.activeChat === chatId) {
+                    this.renderMessage(message, isOwn);
+                }
+                
+                this.updateChatsList();
             }
 
-            addMessage(message, isOwn) {
+            addSystemMessage(chatId, text) {
+                const message = {
+                    id: this.generateId(),
+                    text: text,
+                    sender: 'System',
+                    timestamp: Date.now(),
+                    type: 'system'
+                };
+                
+                this.addMessage(chatId, message, false);
+            }
+
+            renderMessage(message, isOwn) {
                 const messages = document.getElementById('messages');
                 const messageEl = document.createElement('div');
-                messageEl.className = `message ${isOwn ? 'own' : ''}`;
+                messageEl.className = `message ${isOwn ? 'own' : ''} ${message.type || ''}`;
                 
                 const time = new Date(message.timestamp).toLocaleTimeString('ru-RU', {
                     hour: '2-digit',
@@ -1091,204 +1565,348 @@
                 const verification = message.verified === true ? '✓' : 
                                    message.verified === false ? '✗' : '';
                 
-                messageEl.innerHTML = `
-                    <div class="message-header">
-                        <span>${this.escapeHtml(message.sender)}</span>
-                        <span>${verification}</span>
-                        <span>${time}</span>
-                    </div>
-                    <div class="message-content">
-                        ${this.escapeHtml(message.text)}
-                    </div>
-                `;
-                
-                messages.appendChild(messageEl);
-                messages.scrollTop = messages.scrollHeight;
-                
-                // Desktop notification
-                if (!isOwn && document.hidden) {
-                    this.showDesktopNotification(message.sender, message.text);
-                }
-            }
-
-            addSystemMessage(text) {
-                const messages = document.getElementById('messages');
-                const messageEl = document.createElement('div');
-                messageEl.className = 'message system';
-                
-                messageEl.innerHTML = `
-                    <div class="message-content">
-                        ${this.escapeHtml(text)}
-                    </div>
-                `;
-                
-                messages.appendChild(messageEl);
-                messages.scrollTop = messages.scrollHeight;
-            }
-
-            updatePeersList() {
-                const container = document.getElementById('peersContainer');
-                container.innerHTML = '';
-                
-                // Add self
-                const selfEl = document.createElement('div');
-                selfEl.className = 'peer';
-                selfEl.innerHTML = `
-                    <div class="peer-avatar">${this.nickname.charAt(0).toUpperCase()}</div>
-                    <div class="peer-info">
-                        <div class="peer-name">${this.escapeHtml(this.nickname)} (Вы)</div>
-                        <div class="peer-status">🟢 Онлайн</div>
-                    </div>
-                `;
-                container.appendChild(selfEl);
-                
-                // Add peers
-                this.connections.forEach((connInfo, peerId) => {
-                    const peerEl = document.createElement('div');
-                    peerEl.className = 'peer';
-                    
-                    const statusIcon = connInfo.status === 'online' ? '🟢' : '🟡';
-                    const statusText = connInfo.status === 'online' ? 'Онлайн' : 'Подключается';
-                    
-                    peerEl.innerHTML = `
-                        <div class="peer-avatar">${connInfo.nickname.charAt(0).toUpperCase()}</div>
-                        <div class="peer-info">
-                            <div class="peer-name">${this.escapeHtml(connInfo.nickname)}</div>
-                            <div class="peer-status">${statusIcon} ${statusText}</div>
+                if (message.type === 'system') {
+                    messageEl.innerHTML = `
+                        <div class="message-content">
+                            ${this.escapeHtml(message.text)}
                         </div>
                     `;
-                    container.appendChild(peerEl);
-                });
-                
-                // Show peers list if we have connections
-                if (this.connections.size > 0) {
-                    document.getElementById('peersList').classList.remove('hidden');
+                } else {
+                    messageEl.innerHTML = `
+                        <div class="message-header">
+                            <span class="message-sender">${this.escapeHtml(message.sender)}</span>
+                            ${verification && `<span class="message-status">${verification}</span>`}
+                            <span class="message-time">${time}</span>
+                        </div>
+                        <div class="message-content">
+                            ${this.escapeHtml(message.text)}
+                        </div>
+                    `;
                 }
+                
+                messages.appendChild(messageEl);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            openChat(chatId) {
+                this.activeChat = chatId;
+                
+                // Show active chat UI
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('activeChat').classList.remove('hidden');
+                
+                // Find connection info
+                const connection = this.findConnectionByChat(chatId);
+                if (connection) {
+                    const connInfo = this.connections.get(connection.peer);
+                    document.getElementById('chatTitle').textContent = connInfo.nickname;
+                    document.getElementById('chatSubtitle').textContent = 
+                        connInfo.status === 'online' ? '🟢 Онлайн' : '🔴 Офлайн';
+                    document.getElementById('chatAvatar').textContent = 
+                        connInfo.nickname.charAt(0).toUpperCase();
+                }
+                
+                // Load messages
+                this.loadChatMessages(chatId);
+                
+                // Update UI
+                this.updateChatsList();
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('messageInput').focus();
+            }
+
+            loadChatMessages(chatId) {
+                const messagesContainer = document.getElementById('messages');
+                messagesContainer.innerHTML = '';
+                
+                const chat = this.chats.get(chatId);
+                if (chat && chat.messages) {
+                    chat.messages.forEach(message => {
+                        const isOwn = message.senderId === this.userId;
+                        this.renderMessage(message, isOwn);
+                    });
+                }
+            }
+
+            findConnectionByChat(chatId) {
+                for (const [peerId, connInfo] of this.connections) {
+                    if (connInfo.chatId === chatId) {
+                        return connInfo.connection;
+                    }
+                }
+                return null;
+            }
+
+            async addContact() {
+                const inviteCode = document.getElementById('contactInviteCode').value.trim();
+                
+                if (!inviteCode) {
+                    this.showNotification('Введите код приглашения', 'error');
+                    return;
+                }
+                
+                try {
+                    const invite = this.parseInviteCode(inviteCode);
+                    
+                    if (invite.peerId === this.userId) {
+                        this.showNotification('Нельзя добавить самого себя', 'error');
+                        return;
+                    }
+                    
+                    // Check if already connected
+                    if (this.connections.has(invite.peerId)) {
+                        this.showNotification('Пользователь уже в контактах', 'warning');
+                        this.closeModal('addContactModal');
+                        return;
+                    }
+                    
+                    await this.connectToPeer(invite.peerId, invite.inviter);
+                    this.showNotification('Контакт добавлен!', 'success');
+                    this.closeModal('addContactModal');
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка добавления контакта:', error);
+                    this.showNotification(error.message || 'Ошибка добавления контакта', 'error');
+                }
+            }
+
+            async createInvite() {
+                if (this.inviteCount <= 0) {
+                    this.showNotification('Лимит приглашений исчерпан', 'warning');
+                    return;
+                }
+                
+                const description = document.getElementById('inviteDescription').value.trim();
+                
+                try {
+                    const inviteData = {
+                        peerId: this.userId,
+                        inviter: this.nickname,
+                        timestamp: Date.now(),
+                        description: description || 'Приглашение'
+                    };
+                    
+                    const inviteCode = btoa(JSON.stringify(inviteData));
+                    
+                    const invite = {
+                        id: this.generateId(),
+                        code: inviteCode,
+                        description: description || 'Приглашение',
+                        created: Date.now(),
+                        used: false,
+                        usedBy: null
+                    };
+                    
+                    this.invites.push(invite);
+                    this.inviteCount--;
+                    
+                    this.updateInvitesList();
+                    this.showNotification('Приглашение создано!', 'success');
+                    this.closeModal('createInviteModal');
+                    
+                    // Clear form
+                    document.getElementById('inviteDescription').value = '';
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка создания приглашения:', error);
+                    this.showNotification('Ошибка создания приглашения', 'error');
+                }
+            }
+
+            updateChatsList() {
+                const container = document.getElementById('chatsList');
+                container.innerHTML = '';
+                
+                if (this.chats.size === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                            Нет активных чатов<br>
+                            <small>Добавьте контакт для начала общения</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Sort chats by last activity
+                const sortedChats = Array.from(this.chats.values())
+                    .sort((a, b) => b.lastActivity - a.lastActivity);
+                
+                sortedChats.forEach(chat => {
+                    const connection = this.findConnectionByChat(chat.id);
+                    const connInfo = connection ? this.connections.get(connection.peer) : null;
+                    
+                    if (!connInfo) return;
+                    
+                    const chatEl = document.createElement('div');
+                    chatEl.className = `contact-item ${this.activeChat === chat.id ? 'active' : ''}`;
+                    chatEl.onclick = () => this.openChat(chat.id);
+                    
+                    const lastMessage = chat.lastMessage;
+                    const lastMessageText = lastMessage ? 
+                        (lastMessage.text.length > 30 ? 
+                            lastMessage.text.substring(0, 30) + '...' : 
+                            lastMessage.text) : 
+                        'Нет сообщений';
+                    
+                    const statusIcon = connInfo.status === 'online' ? '🟢' : '🔴';
+                    
+                    chatEl.innerHTML = `
+                        <div class="contact-avatar">${connInfo.nickname.charAt(0).toUpperCase()}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${this.escapeHtml(connInfo.nickname)}</div>
+                            <div class="contact-status">${this.escapeHtml(lastMessageText)}</div>
+                        </div>
+                        <div class="contact-actions">
+                            <div class="action-btn">${statusIcon}</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(chatEl);
+                });
+            }
+
+            updateContactsList() {
+                const container = document.getElementById('contactsList');
+                container.innerHTML = '';
+                
+                if (this.connections.size === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                            Нет контактов<br>
+                            <small>Добавьте контакт по коду приглашения</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.connections.forEach((connInfo, peerId) => {
+                    const contactEl = document.createElement('div');
+                    contactEl.className = 'contact-item';
+                    
+                    const statusIcon = connInfo.status === 'online' ? '🟢' : '🔴';
+                    const statusText = connInfo.status === 'online' ? 'Онлайн' : 'Офлайн';
+                    
+                    contactEl.innerHTML = `
+                        <div class="contact-avatar">${connInfo.nickname.charAt(0).toUpperCase()}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${this.escapeHtml(connInfo.nickname)}</div>
+                            <div class="contact-status">${statusIcon} ${statusText}</div>
+                        </div>
+                        <div class="contact-actions">
+                            <div class="action-btn" onclick="app.openChat('${connInfo.chatId}')" title="Открыть чат">💬</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(contactEl);
+                });
             }
 
             updateInvitesList() {
-                const container = document.getElementById('inviteList');
+                const container = document.getElementById('invitesList');
+                const countEl = document.getElementById('inviteCount');
+                
+                countEl.textContent = this.inviteCount;
                 container.innerHTML = '';
                 
-                this.invites.forEach((invite) => {
+                if (this.invites.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                            Нет созданных приглашений<br>
+                            <small>Создайте приглашение для друзей</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.invites.forEach(invite => {
                     const inviteEl = document.createElement('div');
-                    inviteEl.className = 'invite-card';
+                    inviteEl.className = 'invite-item';
                     
                     const shortCode = invite.code.length > 20 ? 
                         invite.code.substring(0, 20) + '...' : invite.code;
                     
+                    const createdDate = new Date(invite.created).toLocaleDateString('ru-RU');
+                    
                     inviteEl.innerHTML = `
-                        <div class="invite-item">
-                            <div class="invite-info">
-                                <div class="invite-code-short">${shortCode}</div>
-                                <div class="invite-status">
-                                    ${invite.used ? '✅ Использован' : '⏳ Ожидает'}
-                                </div>
+                        <div class="invite-info">
+                            <div class="invite-code-short">${shortCode}</div>
+                            <div class="invite-status">
+                                ${invite.description} • ${createdDate} • 
+                                ${invite.used ? '✅ Использован' : '⏳ Активен'}
                             </div>
-                            <button class="btn btn-small" onclick="app.copyInvite('${invite.code}')">
-                                Копировать
-                            </button>
                         </div>
-                        <div class="invite-code" onclick="app.copyInvite('${invite.code}')" 
-                             title="Нажмите для копирования">
-                            ${invite.code}
-                        </div>
+                        <button class="btn btn-small" onclick="app.copyInvite('${invite.code}')">
+                            📋
+                        </button>
                     `;
                     
                     container.appendChild(inviteEl);
+                    
+                    // Add full code display
+                    const codeEl = document.createElement('div');
+                    codeEl.className = 'invite-code';
+                    codeEl.textContent = invite.code;
+                    codeEl.onclick = () => this.copyInvite(invite.code);
+                    codeEl.title = 'Нажмите для копирования';
+                    
+                    container.appendChild(codeEl);
                 });
             }
 
             async copyInvite(code) {
                 try {
                     await navigator.clipboard.writeText(code);
-                    this.showNotification('Код скопирован!', 'success');
+                    this.showNotification('Код скопирован в буфер обмена!', 'success');
                 } catch (error) {
-                    console.error('Ошибка копирования:', error);
+                    console.error('❌ Ошибка копирования:', error);
                     this.showNotification('Ошибка копирования', 'error');
                 }
             }
 
-            updateInviteCount() {
-                document.getElementById('inviteCount').textContent = this.inviteCount;
+            switchTab(tab) {
+                this.currentTab = tab;
                 
-                if (this.inviteCount <= 0) {
-                    document.getElementById('createInviteBtn').disabled = true;
-                    document.getElementById('createInviteBtn').textContent = '❌ Лимит исчерпан';
-                }
-            }
-
-            showStep(stepId) {
-                document.querySelectorAll('.step').forEach(step => {
-                    step.classList.remove('active');
+                // Update tab buttons
+                document.querySelectorAll('.nav-tab').forEach(tabBtn => {
+                    tabBtn.classList.remove('active');
                 });
-                document.getElementById(stepId).classList.add('active');
+                document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+                
+                // Update tab content
+                document.getElementById('chatsTab').classList.toggle('hidden', tab !== 'chats');
+                document.getElementById('contactsTab').classList.toggle('hidden', tab !== 'contacts');
+                document.getElementById('invitesTab').classList.toggle('hidden', tab !== 'invites');
+                
+                // Update content
+                switch (tab) {
+                    case 'chats':
+                        this.updateChatsList();
+                        break;
+                    case 'contacts':
+                        this.updateContactsList();
+                        break;
+                    case 'invites':
+                        this.updateInvitesList();
+                        break;
+                }
             }
 
-            showChat() {
+            showMainApp() {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('sidebar').classList.remove('hidden');
                 document.getElementById('chatContainer').classList.remove('hidden');
-                document.getElementById('chatTitle').textContent = 'SecureChat';
-                document.getElementById('chatInfo').textContent = 
-                    `Участников: ${this.connections.size + 1} • E2E шифрование`;
-            }
-
-            validateInvite(code) {
-                if (!code) {
-                    this.showNotification('Введите код приглашения', 'error');
-                    return false;
-                }
-                if (code.length < 8) {
-                    this.showNotification('Неверный формат кода', 'error');
-                    return false;
-                }
-                return true;
-            }
-
-            validateNick(nickname) {
-                if (!nickname) {
-                    this.showNotification('Введите никнейм', 'error');
-                    return false;
-                }
-                if (nickname.length < 2) {
-                    this.showNotification('Никнейм слишком короткий', 'error');
-                    return false;
-                }
-                if (nickname.length > 20) {
-                    this.showNotification('Никнейм слишком длинный', 'error');
-                    return false;
-                }
-                if (!/^[a-zA-Zа-яА-Я0-9_\-\s]+$/.test(nickname)) {
-                    this.showNotification('Недопустимые символы в никнейме', 'error');
-                    return false;
-                }
-                return true;
-            }
-
-            validateInviteCode() {
-                const input = document.getElementById('inviteCode');
-                const value = input.value.toUpperCase();
-                input.value = value;
                 
-                if (value.length >= 8) {
-                    input.style.borderColor = 'var(--success)';
-                } else if (value.length > 0) {
-                    input.style.borderColor = 'var(--warning)';
-                } else {
-                    input.style.borderColor = 'var(--border)';
-                }
+                document.getElementById('userNickname').textContent = this.nickname;
+                
+                this.switchTab('chats');
             }
 
-            validateNickname() {
-                const input = document.getElementById('nickname');
-                const value = input.value.trim();
-                
-                if (value.length >= 2 && value.length <= 20) {
-                    input.style.borderColor = 'var(--success)';
-                } else if (value.length > 0) {
-                    input.style.borderColor = 'var(--warning)';
-                } else {
-                    input.style.borderColor = 'var(--border)';
-                }
+            openModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+            }
+
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
             }
 
             autoResize(e) {
@@ -1313,12 +1931,14 @@
                 document.body.appendChild(notification);
                 
                 setTimeout(() => {
-                    notification.style.animation = 'slideInRight 0.3s reverse';
-                    setTimeout(() => {
-                        if (document.body.contains(notification)) {
-                            document.body.removeChild(notification);
-                        }
-                    }, 300);
+                    if (document.body.contains(notification)) {
+                        notification.style.animation = 'slideInRight 0.3s reverse';
+                        setTimeout(() => {
+                            if (document.body.contains(notification)) {
+                                document.body.removeChild(notification);
+                            }
+                        }, 300);
+                    }
                 }, duration);
             }
 
@@ -1326,35 +1946,119 @@
                 if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification(`${sender} в SecureChat`, {
                         body: text.substring(0, 100),
-                        icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"%3E%3Ccircle cx="16" cy="16" r="14" fill="%230DBD8B"/%3E%3Ctext x="16" y="20" text-anchor="middle" font-size="14" fill="white"%3E🔒%3C/text%3E%3C/svg%3E'
+                        icon: '/favicon.ico'
                     });
                 }
             }
 
-            checkPWA() {
-                // Check for install prompt
+            initPWA() {
+                // Service Worker
+                if ('serviceWorker' in navigator) {
+                    const swCode = `
+                        const CACHE_NAME = 'securechat-v1.0.0';
+                        const urlsToCache = [
+                            '/',
+                            'https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js',
+                            'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+                        ];
+
+                        self.addEventListener('install', event => {
+                            event.waitUntil(
+                                caches.open(CACHE_NAME)
+                                    .then(cache => cache.addAll(urlsToCache))
+                                    .catch(err => console.log('Cache error:', err))
+                            );
+                        });
+
+                        self.addEventListener('fetch', event => {
+                            event.respondWith(
+                                caches.match(event.request)
+                                    .then(response => response || fetch(event.request))
+                                    .catch(() => {
+                                        if (event.request.destination === 'document') {
+                                            return caches.match('/');
+                                        }
+                                    })
+                            );
+                        });
+
+                        self.addEventListener('message', event => {
+                            if (event.data && event.data.type === 'SKIP_WAITING') {
+                                self.skipWaiting();
+                            }
+                        });
+                    `;
+
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    
+                    navigator.serviceWorker.register(swUrl)
+                        .then(registration => {
+                            console.log('✅ Service Worker зарегистрирован');
+                        })
+                        .catch(error => {
+                            console.error('❌ Ошибка Service Worker:', error);
+                        });
+                }
+
+                // PWA Manifest
+                const manifest = {
+                    name: 'SecureChat P2P',
+                    short_name: 'SecureChat',
+                    description: 'Безопасный P2P мессенджер только по приглашениям',
+                    start_url: '/',
+                    display: 'standalone',
+                    background_color: '#0D1117',
+                    theme_color: '#0DBD8B',
+                    orientation: 'portrait-primary',
+                    icons: [
+                        {
+                            src: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iOTYiIGZpbGw9IiMwREJEOEIiLz48c3ZnIHg9IjQ4IiB5PSI0OCIgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IndoaXRlIj48cGF0aCBkPSJNMTggOGgtMVY2YzAtMi43Ni0yLjI0LTUtNS01UzIgMy4yNCAyIDZ2Mkg2YzEuMSAwIDIgLjkgMiAydjEwYzAgMS4xLS45IDItMiAySDZjLTEuMSAwLTItLjktMi0yVjEwYzAtMS4xLjktMiAyLTJoMVY2YzAtMS42NiAxLjM0LTMgMy0zczMgMS4zNCAzIDN2Mkg2djEwaDEyVjEweiIvPjwvc3ZnPjwvc3ZnPg==',
+                            sizes: '192x192',
+                            type: 'image/svg+xml'
+                        },
+                        {
+                            src: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyNTYiIGZpbGw9IiMwREJEOEIiLz48c3ZnIHg9IjEyOCIgeT0iMTI4IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE4IDhoLTFWNmMwLTIuNzYtMi4yNC01LTUtNVMyIDMuMjQgMiA2djJINmMxLjEgMCAyIC45IDIgMnYxMGMwIDEuMS0uOSAyLTIgMkg2Yy0xLjEgMC0yLS45LTItMlYxMGMwLTEuMS45LTIgMi0yaDF2LTJjMC0xLjY2IDEuMzQtMyAzLTNzMyAxLjM0IDMgM3YySDZ2MTBoMTJWMTB6Ii8+PC9zdmc+PC9zdmc+',
+                            sizes: '512x512',
+                            type: 'image/svg+xml'
+                        }
+                    ]
+                };
+
+                const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                
+                const link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = manifestUrl;
+                document.head.appendChild(link);
+
+                // Install prompt
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
-                    this.installPrompt = e;
+                    this.deferredPrompt = e;
                     
-                    // Show install suggestion after delay
                     setTimeout(() => {
                         if (!window.matchMedia('(display-mode: standalone)').matches) {
-                            this.showNotification('Установите приложение для лучшего опыта', 'info', 6000);
+                            this.showNotification('💡 Установите приложение для лучшего опыта!', 'info', 8000);
                         }
-                    }, 10000);
+                    }, 30000);
                 });
-                
+
                 // Request notification permission
                 if ('Notification' in window && Notification.permission === 'default') {
                     setTimeout(() => {
-                        Notification.requestPermission();
+                        Notification.requestPermission().then(permission => {
+                            if (permission === 'granted') {
+                                console.log('✅ Уведомления разрешены');
+                            }
+                        });
                     }, 5000);
                 }
             }
 
             generateId() {
-                return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
             }
 
             escapeHtml(text) {
@@ -1364,58 +2068,50 @@
             }
 
             destroy() {
-                if (this.peer) this.peer.destroy();
+                if (this.peer && !this.peer.destroyed) {
+                    this.peer.destroy();
+                }
                 this.connections.forEach(connInfo => {
-                    if (connInfo.connection) connInfo.connection.close();
+                    if (connInfo.connection && connInfo.connection.open) {
+                        connInfo.connection.close();
+                    }
                 });
             }
+        }
+
+        // Global functions for onclick handlers
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
 
         // Initialize app
         let app;
         
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             try {
                 app = new SecureChat();
                 
-                console.log('🚀 SecureChat запущен');
+                console.log('🚀 SecureChat P2P запущен');
                 console.log('🔐 End-to-End шифрование активно');
                 console.log('🎫 Система приглашений готова');
+                console.log('💬 WebRTC P2P соединения готовы');
                 
             } catch (error) {
                 console.error('❌ Критическая ошибка:', error);
+                document.body.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; text-align: center; padding: 20px; background: var(--bg-primary); color: var(--text-primary);">
+                        <h1 style="color: var(--danger); margin-bottom: 20px;">⚠️ Ошибка</h1>
+                        <p style="margin-bottom: 20px;">Не удалось запустить приложение</p>
+                        <button onclick="location.reload()" style="padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer;">🔄 Перезагрузить</button>
+                    </div>
+                `;
             }
         });
-
-        // PWA Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(`
-                const CACHE_NAME = 'securechat-v2';
-                const urlsToCache = ['/'];
-
-                self.addEventListener('install', event => {
-                    event.waitUntil(
-                        caches.open(CACHE_NAME)
-                            .then(cache => cache.addAll(urlsToCache))
-                    );
-                });
-
-                self.addEventListener('fetch', event => {
-                    event.respondWith(
-                        caches.match(event.request)
-                            .then(response => response || fetch(event.request))
-                    );
-                });
-            `)).catch(console.error);
-        }
 
         // Cleanup
         window.addEventListener('beforeunload', () => {
             if (app) app.destroy();
         });
     </script>
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU2VjdXJlQ2hhdCBQMlAiLCJzaG9ydF9uYW1lIjoiU2VjdXJlQ2hhdCIsImRlc2NyaXB0aW9uIjoi0JTQtdGG0LXQvdGC0YDQsNC70LjQt9C+0LLQsNC90L3Ri9C5INC80LXRgdGB0LXQvdC00LbQtdGAINGC0L7Qu9GM0LrQviDQv9C+INC/0YDQuNCz0LvQsNGI0LXQvdC40Y/QvCIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMEQxMTE3IiwidGhlbWVfY29sb3IiOiIjMERCRDhCIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTgwIDE4MCclM0UlM0NjaXJjbGUgY3g9JzkwJyBjeT0nOTAnIHI9JzgwJyBmaWxsPSclMjMwREJEOEInLyUzRSUzQ3RleHQgeD0nOTAnIHk9JzExMCcgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc4MCcgZmlsbD0nd2hpdGUnJTNFJUYwJTlGJTk0JTkyJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiIxODB4MTgwIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 </body>
 </html>
